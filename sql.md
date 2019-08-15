@@ -15,20 +15,20 @@
 
 
 **Using ROW_NUMBER() and MIN() to select first row in each group when using group clause**
-	    /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
-        select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
-        		Contact.ID as ContactID, 
-        		Contact.TradingName COLLATE DATABASE_DEFAULT as TradingName, 
-        		Contact.LastUpdated, 
-        		TPICCode.PICCode COLLATE DATABASE_DEFAULT as PICCode, 
-        		TContactType.ContactType,
-        		TContactPICCount.CountOfPICCodes
-        	INTO #TempContact
-         from …..
-        
-        
-        /* Using MIN() to select first row in each group */
-        (select MIN(#TempContact.RowNum) as ld from #TempContact group by PICCode))
+
+    /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
+    select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
+    		Contact.ID as ContactID, 
+    		Contact.TradingName COLLATE DATABASE_DEFAULT as TradingName, 
+    		Contact.LastUpdated, 
+    		TPICCode.PICCode COLLATE DATABASE_DEFAULT as PICCode, 
+    		TContactType.ContactType,
+    		TContactPICCount.CountOfPICCodes
+    	INTO #TempContact
+     from …..
+    
+    /* Using MIN() to select first row in each group */
+    (select MIN(#TempContact.RowNum) as ld from #TempContact group by PICCode))
 
 **Concat list values to string delimited BY char**
 
@@ -43,5 +43,5 @@
 
  
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIwMTAyMDM5MzksLTc0OTYzMDYwM119
+eyJoaXN0b3J5IjpbLTEzNTYwNDIxNTldfQ==
 -->
