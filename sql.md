@@ -18,7 +18,7 @@
 
    
 
-    /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
+	    /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
         select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
         		Contact.ID as ContactID, 
         		Contact.TradingName COLLATE DATABASE_DEFAULT as TradingName, 
@@ -34,5 +34,5 @@
         (select MIN(#TempContact.RowNum) as ld from #TempContact group by PICCode))
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5NDMyMTQyOTQsLTc0OTYzMDYwM119
+eyJoaXN0b3J5IjpbLTk4MDI2NTUzNCwtNzQ5NjMwNjAzXX0=
 -->
