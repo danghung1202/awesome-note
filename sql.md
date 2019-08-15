@@ -45,7 +45,8 @@
 
     use [Database_Name]
     go
-     
+    
+    declare @dblogfile = nvarchar(max);
     SELECT file_id, name  
     FROM sys.database_files;  
     GO  
@@ -53,5 +54,5 @@
     GO
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTgwNjY1MDUzNl19
+eyJoaXN0b3J5IjpbLTM0OTYxNTY2LC04MDY2NTA1MzZdfQ==
 -->
