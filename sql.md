@@ -41,7 +41,17 @@
     
     SELECT @List
 
- 
+ **Delete SQL log file**
+
+    use [Database_Name]
+    go
+     
+    SELECT file_id, name  
+    FROM sys.database_files;  
+    GO  
+    dbcc shrinkfile([Database_LogFile],1);
+    GO
+
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzNTYwNDIxNTldfQ==
+eyJoaXN0b3J5IjpbLTgwNjY1MDUzNiwtMTM1NjA0MjE1OV19
 -->
