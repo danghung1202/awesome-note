@@ -15,9 +15,6 @@
 
 
 **Using ROW_NUMBER() and MIN() to select first row in each group when using group clause**
-
-   
-
 	    /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
         select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
         		Contact.ID as ContactID, 
@@ -33,6 +30,18 @@
         /* Using MIN() to select first row in each group */
         (select MIN(#TempContact.RowNum) as ld from #TempContact group by PICCode))
 
+**Concat list values to string delimited BY char**
+
+    /* Concat list values in GROUP to string delimited BY char */
+    DECLARE @List VARCHAR(8000)
+    
+    SELECT @List = COALESCE(@List + ',', '') + CAST(OfferID AS VARCHAR)
+    FROM   Emp
+    WHERE  EmpID = 23
+    
+    SELECT @List
+
+ 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTk4MDI2NTUzNCwtNzQ5NjMwNjAzXX0=
+eyJoaXN0b3J5IjpbLTIwMTAyMDM5MzksLTc0OTYzMDYwM119
 -->
