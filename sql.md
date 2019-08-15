@@ -43,16 +43,17 @@
 
  **Delete SQL log file**
 
-    use [Database_Name]
-    go
-    
-    declare @dblogfile = nvarchar(max);
-    SELECT file_id, name  
-    FROM sys.database_files;  
-    GO  
-    dbcc shrinkfile([Database_LogFile],1);
+    USE [TRMCommerceManager]
+GO
+
+declare @dblog_filename nvarchar(2000);
+
+SELECT @dblog_filename = name  
+FROM sys.database_files;  
+GO  
+    dbcc shrinkfile(@dblog_filename,1);
     GO
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTM0OTYxNTY2LC04MDY2NTA1MzZdfQ==
+eyJoaXN0b3J5IjpbLTEzMjA5NDY4NjIsLTgwNjY1MDUzNl19
 -->
