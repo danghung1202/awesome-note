@@ -34,6 +34,12 @@
 8.  Reboot, for good measure.
 
 [https://stackoverflow.com/questions/20711240/how-to-completely-remove-node-js-from-windows](https://stackoverflow.com/questions/20711240/how-to-completely-remove-node-js-from-windows)
+
+**Using global modules on Window**
+
+Add an environment variable called `NODE_PATH` and set it to `%USERPROFILE%\Application Data\npm\node_modules` (Windows XP), `%AppData%\npm\node_modules` (Windows 7/8/10), or wherever npm ends up installing the modules on your Windows flavor. To be done with it once and for all, add this as a System variable in the Advanced tab of the System Properties dialog (run `control.exe sysdm.cpl,System,3`).
+
+[https://stackoverflow.com/questions/9587665/nodejs-cannot-find-installed-module-on-windows](https://stackoverflow.com/questions/9587665/nodejs-cannot-find-installed-module-on-windows)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzU0NTAzNTE1XX0=
+eyJoaXN0b3J5IjpbMzExNTcyOTcxLDM1NDUwMzUxNV19
 -->
