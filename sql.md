@@ -14,7 +14,7 @@
     order by DataFileSizeMB desc
 
 
-**Using ROW_NUMBER() and MIN() to select first row in each group when using group clause**
+**Using `ROW_NUMBER()` and `MIN()` to select first row in each group when using group clause**
 
     /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
     select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
@@ -53,7 +53,3 @@
     
     dbcc shrinkfile(@dblog_filename,1);
     GO
-
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzNDYyMDM1NThdfQ==
--->
