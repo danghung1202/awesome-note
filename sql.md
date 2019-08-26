@@ -1,3 +1,7 @@
+# SQL Notes
+
+Listing all useful scripts
+
 **Get database size**
 
     with fs

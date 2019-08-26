@@ -34,7 +34,8 @@ Some my understanding regard to Rxjs Operators, how it work and how to apply to 
 
 ## combineLatest
 
-    //You have many Observable, when each one of these emit value, we want to combine all lastest values from these streams
+You have many Observable, when each one of these emit value, we want to combine all lastest values from these streams
+
     this.subSelectedFilter = Observable.combineLatest(this.selectedThemes, this.selectedSubthemes, this.selectedYears,
                 (themes, subthemes, years) =>
                     ({
@@ -111,9 +112,7 @@ Example using share()
 
 I have some Observables to combine together as one Observable, and I want to be notified when all of them have completed.
 
-In real application, if there are two or many asyn requests (parallel) and we want to do something after all these requests is completed, 
-
-we can use forkJoin for this case
+In real application, if there are two or many asyn requests (parallel) and we want to do something after all these requests is completed, we can use forkJoin for this case
 
 Example
 
@@ -140,7 +139,8 @@ Example
 
 ## RxJs_Cache
 
-    //using cache in Observable
+Using cache in Observable
+
     private _themes: any = null;
     getThemes(): Observable<Theme[]> {
       if (!this._themes) {
@@ -158,7 +158,7 @@ Example
 
 ## Subject and BehaviorSubject
 
-For `Subject` object, all values was sent before subscriber is not deliveried to that subscriber
+For `Subject` object, all values was sent before subscriber is not delivered to that subscriber
 
     const subject = new Rx.Subject();
     subject.next(1);
@@ -176,7 +176,7 @@ For `BehaviorSubject` object, one previous value still delivery to subscriber al
     bsubject.next(3);
     //output: 1,2,3
     
-Incase you want to more one previous values are deliveried to late subscriber, using `ReplaySubject`.
+Incase you want to more one previous values are delivered to late subscriber, using `ReplaySubject`.
 
     const replay = new ReplaySubject(number_of_previous_item_will_be_delivery)
 
