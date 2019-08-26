@@ -60,3 +60,40 @@ public partial class MetalPriceImportPlugin : WebFormsBase
 **Reference** 
 [How to create a nice looking admin plugin](https://world.episerver.com/blogs/Per-Nergard/Dates/2013/4/How-to-create-a-nice-looking-admin-plugin/)
 
+
+## Performance issue with find Simple URL in CMS
+
+An our customer found this issue when he investigated the performance issues on Production. Basically, his site have a lot of apis however those are quite slow in an expected way. The root cause is the router for apis were registered after "Simple URL" router of EpiServer. This is led to each api was called, the site need to resolve SimpleURL router first then api router. This is unnecessary thing.
+
+=> So all custom routers in an Epi site should register before SimpleURL
+
+All code for register custom routers need to make sure run firstly before the below code
+
+```
+public void Initialize(InitializationEngine context)
+{
+    //Register custom routers here
+
+    //Remove "simpleaddress" router and add it to last
+    Global.RoutesRegistered += Global_RoutesRegistered;
+}
+
+private void Global_RoutesRegistered(object sender, RouteRegistrationEventArgs e)
+{
+    var simpleAddressRouter =
+        e.Routes.OfType<IContentRoute>().FirstOrDefault(r => r.Name.Equal.("simpleaddress"));
+    if (simpleAddressRouter != null)
+    {
+        e.Routes.Remove((RouteBase) simpleAddressRouter);
+        e.Routes.Add(simpleAddressRouter);
+    }
+}
+```
+
+
+**Reference**
+
+https://vimvq1987.com/episerver-cms-performance-optimization-part-1/
+
+https://world.episerver.com/documentation/Release-Notes/ReleaseNote/?releaseNoteId=CMS-7791
+
