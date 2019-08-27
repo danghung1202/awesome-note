@@ -210,3 +210,21 @@ Using `swichMap()` can resolve this.
           return (current && current.get('invalid')) || accum;
         }, false);
     }
+
+
+
+## Difference between Rxjs Subject and Observable
+
+This shows how subscribe calls are not shared among multiple Observers of the same Observable. When calling observable.subscribe with an Observer, the function subscribe in Observable.create(function subscribe(observer) {...}) is run for that given Observer. Each call to observable.subscribe triggers its own independent setup for that given Observer.
+
+From <http://reactivex.io/rxjs/manual/overview.html#observer> 
+
+What is a Subject? An RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers. While plain Observables are unicast (each subscribed Observer owns an independent execution of the Observable), Subjects are multicast.
+
+From <http://reactivex.io/rxjs/manual/overview.html#observer> 
+
+All sub­scribers to a sub­ject share the same exe­cu­tion of the sub­ject. i.e. when a sub­ject pro­duces data, all of its sub­scribers will receive the same data. This behav­ior is dif­fer­ent from observ­ables, where each sub­scrip­tion causes an inde­pen­dent exe­cu­tion of the observable.
+
+From <http://javascript.tutorialhorizon.com/2017/03/23/rxjs-subject-vs-observable/> 
+
+An Observable is A Data Producer while An Subject can act as both: A Data Producer & A Data Consumer
