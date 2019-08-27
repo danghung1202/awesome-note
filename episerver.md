@@ -1,5 +1,100 @@
 # EpiServer Notes
 
+## How to override, decorate the default implement of the class in EpiServer
+
+> Conditions: The class must to register as service via IOC using StructureMap or any IOC framework which support Decorate pattern
+
+Based on my experience when working on some Epi commerce projects, depend on if the default implement has the method which can be override, there are two ways to archive it
+
+### **The default implement have the method which can be override (has `virtual` keyword)**
+
+In EpiServer Commerce has an interface to service for updating and retrieving `EPiServer.Commerce.Order.ILineItem.PlacedPrice` for `EPiServer.Commerce.Order.IOrderGroup`.
+
+    public interface IPlacedPriceProcessor
+
+The default implement 
+
+    public class DefaultPlacedPriceProcessor : IPlacedPriceProcessor
+
+In this class, all methods are decorated with `virtual` keyword like that 
+
+    public virtual Money? GetPlacedPrice(EntryContentBase entry, decimal quantity, CustomerContact customerContact, IMarket market, Currency currency);
+
+So in this way, in IOC configuration using StructureMap, you can override and decorate this class with this configuration:
+
+```
+    public void ConfigureContainer(ServiceConfigurationContext context)
+        {
+            context.StructureMap().Configure(ce =>
+            {
+                ce.For<IPlacedPriceProcessor>().Use<TrmPlacedPriceProcessor>().Singleton();
+                ce.For<IAmStoreHelper>().DecorateAllWith<TrmStoreHelper>();
+            });
+        }
+```
+
+The new implement need to inherit from the default implement `DefaultPlacedPriceProcessor`. Following this way, we can override any method and keep other methods as default.
+
+```
+public class TrmPlacedPriceProcessor : DefaultPlacedPriceProcessor, IPlacedPriceProcessor
+    {
+        public override Money? GetPlacedPrice(EntryContentBase entry, decimal quantity, CustomerContact customerContact,
+            MarketId marketId, Currency currency) 
+            {
+                //Override here
+            }
+    }
+
+```
+
+So from now on, all places are using `IPlacedPriceProcessor` to invoke the method `GetPlacedPrice` will run our override code
+
+### **The default implement don't have the method which can be override (no `virtual` keyword)**
+
+In Epi Commerce, there is an interface `IPriceService` with default implement class `PriceServiceDatabase`. In this class, all methods don't have any `virtual` keyword so we can not override it.
+
+Luckily, this class is registered via IOC, we have a chance to do it.
+
+Registered via IOC the new implement same above
+
+```
+public void ConfigureContainer(ServiceConfigurationContext context)
+        {
+            context.StructureMap().Configure(ce =>
+            {
+                ce.For<IPriceService>().Use<PriceServiceDatabase>();
+                ce.For<IPriceService>().DecorateAllWith<TrmPriceService>();
+            });
+        }
+```
+
+The key technical step in this way: Inject `IPriceService` itself to new implement class and StructureMap will do the remain, **injecting the instance of the default implement class to using in the new implement class**
+
+```
+public class TrmPriceService : IPriceService
+    {
+        private readonly IPriceService _mediachasePricingService;
+        public TrmPriceService(IPriceService mediachasePricingService){
+            _mediachasePricingService = mediachasePricingService;
+        }
+
+        public virtual IEnumerable<IPriceValue> GetCatalogEntryPrices(CatalogKey catalogKey)
+        {
+            //Override here
+            
+            //Or decorate with a wrapper here before call the default implement
+            return _mediachasePricingService.GetCatalogEntryPrices(catalogKey);
+        }
+
+        //do the same with other remaining methods
+    }
+```
+
+Following this way, you can decorate the default implement of any method ex add `virtual` keyword, logging, audit..
+
+
+> [More about Decorate with StructureMap](https://robertlinde.se/posts/ioc,-structuremap-and-an-async-generic-repository/)
+
 ## Create nice Admin tool
 
 You can create EpiServer admin tool using Mvc template or `.aspx` template. In case using `.aspx` template, you should follow the standard UI
