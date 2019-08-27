@@ -92,6 +92,7 @@ public class TrmPriceService : IPriceService
 
 Following this way, you can decorate the default implement of any method ex add `virtual` keyword, logging, audit..
 
+> Thanks Ha.Bui for this useful note :)
 
 > [More about Decorate with StructureMap](https://robertlinde.se/posts/ioc,-structuremap-and-an-async-generic-repository/)
 
