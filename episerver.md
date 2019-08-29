@@ -1,10 +1,10 @@
-# EpiServer Notes
+# EpiServer CMS and Commerce Notes
 
 ## How to override, decorate the default implement of the class in EpiServer
 
 > Conditions: The class must to register as service via IOC using StructureMap or any IOC framework which support Decorate pattern
 
-Based on my experience when working on some Epi commerce projects, depend on if the default implement has the method which can be override, there are two ways to archive it
+Based on my experience when working on some Epi commerce projects, depend on if the default implement class has the method which can be override, there are two ways to archive it
 
 ### **The default implement have the method which can be override (has `virtual` keyword)**
 
@@ -12,7 +12,7 @@ In EpiServer Commerce has an interface to service for updating and retrieving `E
 
     public interface IPlacedPriceProcessor
 
-The default implement 
+The default implement class
 
     public class DefaultPlacedPriceProcessor : IPlacedPriceProcessor
 
@@ -33,7 +33,7 @@ So in this way, in IOC configuration using StructureMap, you can override and de
         }
 ```
 
-The new implement need to inherit from the default implement `DefaultPlacedPriceProcessor`. Following this way, we can override any method and keep other methods as default.
+The new implement class need to inherit from the default implement `DefaultPlacedPriceProcessor`. Following this way, we can override any method and keep other methods as default.
 
 ```
 public class TrmPlacedPriceProcessor : DefaultPlacedPriceProcessor, IPlacedPriceProcessor
@@ -49,13 +49,13 @@ public class TrmPlacedPriceProcessor : DefaultPlacedPriceProcessor, IPlacedPrice
 
 So from now on, all places are using `IPlacedPriceProcessor` to invoke the method `GetPlacedPrice` will run our override code
 
-### **The default implement don't have the method which can be override (no `virtual` keyword)**
+### **The default implement class don't have the method which can be override (no `virtual` keyword)**
 
 In Epi Commerce, there is an interface `IPriceService` with default implement class `PriceServiceDatabase`. In this class, all methods don't have any `virtual` keyword so we can not override it.
 
 Luckily, this class is registered via IOC, we have a chance to do it.
 
-Registered via IOC the new implement same above
+Registered via IOC the new implement class same above
 
 ```
 public void ConfigureContainer(ServiceConfigurationContext context)
@@ -153,6 +153,12 @@ public partial class MetalPriceImportPlugin : WebFormsBase
 }
 ```
 
+### How to create Admin Tool which do the long progress task
+
+**Using ThreadPool**
+
+**How to update progress to client user when task is processing**
+
 **Reference** 
 [How to create a nice looking admin plugin](https://world.episerver.com/blogs/Per-Nergard/Dates/2013/4/How-to-create-a-nice-looking-admin-plugin/)
 
@@ -193,3 +199,59 @@ https://vimvq1987.com/episerver-cms-performance-optimization-part-1/
 
 https://world.episerver.com/documentation/Release-Notes/ReleaseNote/?releaseNoteId=CMS-7791
 
+
+## There are three ways to identify an catalog entries (products, variations, bundles, packages...)
+
+An Id (int), a code (string) or an unique identifier (Guid, introduced in Commerce 7.10).
+
+* An `Id` is used internally within the catalog
+* A `Guid` is used to communicate with Episerver CMS (if you have worked with Episerver CMS, you might know the concept of permanent link)
+* A `Code` is used to work with external systems, such as ERP or PIM. Almost every feature which might work with external system works with code.
+
+Since Epi Commerce integrated tightly with Epi Cms, each `Node` or `Entry` has `ContentLink` with type `ContentReference`
+
+**So how to convert between cms`ContentLink` and commerce `Id`, `Code`**
+> For `Guid`, we don't often use it in real application
+
+Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-library/?documentId=commerce/13/99E11299)**
+
+1. Get cms `ContentLink` from commerce `Code`
+
+```
+    var referenceConverter = ServiceLocator.Current.GetInstance<ReferenceConverter>();
+
+    var code = "variant-code"; 
+    var variantLink = referenceConverter.GetContentLink(code);
+```
+
+2. Get cms `ContentLink` from commerce `Id`
+
+```
+    var referenceConverter = ServiceLocator.Current.GetInstance<ReferenceConverter>();
+    var commerceId = 22;
+    var workId = 0;
+
+    var variantLink= referenceConverter.GetContentLink(commerceId , workId);
+```
+
+3. Get commerce `Id` from cms `ContentLink`
+
+```
+    var contentLink = new ContentReference(4);
+    var referenceConverter = ServiceLocator.Current.GetInstance<ReferenceConverter>();
+
+    var entryId = referenceConverter.GetObjectId(contentLink);
+```
+
+4. Get commerce `Code` from cms `ContentLink`
+
+```
+    var contentLoader = ServiceLocator.Current.GetInstance<IContentLoader>();
+
+    var entry = contentLoader.Get<EntryContentBase>(entryContentLink)?.Code;
+```
+
+**References**
+
+* [How To Load And Retrieve A Variant Or Product From Episerver Commerce](http://www.jondjones.com/learn-episerver-cms/episerver-commerce/how-to-load-and-retrieve-a-variant-or-product-from-episerver-commerce)
+* [Catalog content provider](https://world.episerver.com/documentation/developer-guides/commerce/catalogs/catalog-content/Catalog-content-provider/)
