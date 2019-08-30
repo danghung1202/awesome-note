@@ -27,8 +27,8 @@ So in this way, in IOC configuration using StructureMap, you can override and de
         {
             context.StructureMap().Configure(ce =>
             {
-                ce.For<IPlacedPriceProcessor>().Use<TrmPlacedPriceProcessor>().Singleton();
-                ce.For<IAmStoreHelper>().DecorateAllWith<TrmStoreHelper>();
+                ce.For<IPlacedPriceProcessor>().Use<DefaultPlacedPriceProcessor>();
+                ce.For<IPlacedPriceProcessor>().DecorateAllWith<TrmPlacedPriceProcessor>();
             });
         }
 ```
@@ -91,6 +91,54 @@ public class TrmPriceService : IPriceService
 ```
 
 Following this way, you can decorate the default implement of any method ex add `virtual` keyword, logging, audit..
+
+### **Update**: Unexpected case
+I've just see a weird case when trying DecoratorAllWith a service class. In my case, the default implement class was registered via IOC using EpiServer `ServiceConfigurationAttribute` like that
+
+    [ServiceConfiguration(typeof(IAmStoreHelper), Lifecycle = ServiceInstanceScope.Singleton)]
+    public class StoreHelper : IAmStoreHelper
+    {
+    }
+
+I need the interface `IAmStoreHelper` is decorator all with `MyStoreHelper` and the default implement don't use any `virtual` keyword, so I do it via EpiServer's `ConfigurableModule` with `[ModuleDependency(typeof(ServiceContainerInitialization))]` to make sure that my implement class will be registered after default implement
+
+```
+context.StructureMap().Configure(ce =>
+    {
+        ce.For<IAmStoreHelper>().Use<StoreHelper>();
+        ce.For<IAmStoreHelper>().DecorateAllWith<MyStoreHelper>();
+    });
+```
+
+Unluckily, the `DecorateAllWith` somehow is not working as my expected. I don't know what reason even I added `ce.For<IAmStoreHelper>().ClearAll()` to clear all previous registered classes of `IAmStoreHelper`. After take some while to google, i found the solution for this case:
+
+1. Clear all previous registered implement classes
+2. Using StructureMap's `Add` method to add the old default implement with a special name
+3. Using StructureMap's `Use` method to register new default implement for the interface with `.Ctor` to inject the old implement to new implement
+
+```
+ce.For<IAmStoreHelper>().ClearAll();
+ce.For<IAmStoreHelper>().Add<StoreHelper>().Named(nameof(StoreHelper));
+ce.For<IAmStoreHelper>().Use<MyStoreHelper>().Ctor<IAmStoreHelper>()
+    .Is(ctx => ctx.GetInstance<IAmStoreHelper>(nameof(StoreHelper)));
+```
+
+Now i have the same result since using `DecorateAllWith`
+
+```
+public class MyStoreHelper : IAmStoreHelper
+    {
+        private readonly IAmStoreHelper _storeHelper;
+        public TrmStoreHelper(IAmStoreHelper storeHelper){
+            //The old implement will injected here
+            _storeHelper = storeHelper;
+        }
+    }
+```
+
+**Note**: This tip will also be useful for the case in which you don't want to use `DecorateAllWith`
+
+> The difference between StructureMap's `Add()` and `Use()`, you can find here [What is the difference](https://stackoverflow.com/questions/26544754/how-di-frameworks-resolve-dependency-for-same-interface-with-multiple-configurat/27365025#27365025)
 
 > Thanks Ha.Bui for this useful note :)
 
