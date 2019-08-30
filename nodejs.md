@@ -1,5 +1,10 @@
 # NodeJS Notes
 
+- [NodeJS Notes](#nodejs-notes)
+  - [Install/Uninstall node js on Window](#installuninstall-node-js-on-window)
+  - [Using global modules on Window](#using-global-modules-on-window)
+
+## Install/Uninstall node js on Window
 
 **Install node js on Window**
 
@@ -38,7 +43,7 @@
 
 [https://stackoverflow.com/questions/20711240/how-to-completely-remove-node-js-from-windows](https://stackoverflow.com/questions/20711240/how-to-completely-remove-node-js-from-windows)
 
-**Using global modules on Window**
+## Using global modules on Window
 
 Add an environment variable called `NODE_PATH` and set it to `%USERPROFILE%\Application Data\npm\node_modules` (Windows XP), `%AppData%\npm\node_modules` (Windows 7/8/10), or wherever npm ends up installing the modules on your Windows flavor. To be done with it once and for all, add this as a System variable in the Advanced tab of the System Properties dialog (run `control.exe sysdm.cpl,System,3`).
 

@@ -1,5 +1,15 @@
 # EpiServer CMS and Commerce Notes
 
+- [EpiServer CMS and Commerce Notes](#episerver-cms-and-commerce-notes)
+  - [How to override, decorate the default implement of the class in EpiServer](#how-to-override-decorate-the-default-implement-of-the-class-in-episerver)
+    - [**The default implement have the method which can be override (has `virtual` keyword)**](#the-default-implement-have-the-method-which-can-be-override-has-virtual-keyword)
+    - [**The default implement class don't have the method which can be override (no `virtual` keyword)**](#the-default-implement-class-dont-have-the-method-which-can-be-override-no-virtual-keyword)
+    - [**Update**: Unexpected case](#update-unexpected-case)
+  - [Create nice Admin tool](#create-nice-admin-tool)
+    - [How to create Admin Tool which do the long progress task](#how-to-create-admin-tool-which-do-the-long-progress-task)
+  - [Performance issue with find Simple URL in CMS](#performance-issue-with-find-simple-url-in-cms)
+  - [There are three ways to identify an catalog entries (products, variations, bundles, packages...)](#there-are-three-ways-to-identify-an-catalog-entries-products-variations-bundles-packages)
+
 ## How to override, decorate the default implement of the class in EpiServer
 
 > Conditions: The class must to register as service via IOC using StructureMap or any IOC framework which support Decorate pattern
