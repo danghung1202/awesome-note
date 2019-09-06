@@ -72,3 +72,15 @@ public ngOnDestroy (): void {
 Using a private subject like this is a pattern to manage unsubscribing many observables in the component.
 
 > Note the usage of `takeUntil` with take here. This is to avoid memory leaks caused when the subscription hasn’t received a value before the component got destroyed. Without `takeUntil` here, the subscription would still hang around until it gets the first value, but since the component has already gotten destroyed, it will never get a value — leading to a memory leak.
+
+
+## How difference between `Rather than` and `Other than`?
+Rather than is like saying instead of
+
+    The food was cooked with flame rather than electric heat
+
+Other than is like saying except or except for
+
+    He said he doesn't own any property other than his home
+
+I'm sorry I'm not better with technical definitions...😬

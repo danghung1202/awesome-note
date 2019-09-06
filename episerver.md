@@ -8,7 +8,20 @@
   - [Create nice Admin tool](#create-nice-admin-tool)
     - [How to create Admin Tool which do the long progress task](#how-to-create-admin-tool-which-do-the-long-progress-task)
   - [Performance issue with find Simple URL in CMS](#performance-issue-with-find-simple-url-in-cms)
+  - [Performance issue with Async keyword when call api](#performance-issue-with-async-keyword-when-call-api)
   - [There are three ways to identify an catalog entries (products, variations, bundles, packages...)](#there-are-three-ways-to-identify-an-catalog-entries-products-variations-bundles-packages)
+  - [How to create Commerce Site with Epi Commerce](#how-to-create-commerce-site-with-epi-commerce)
+    - [Set/get prices flow](#setget-prices-flow)
+      - [Abstraction Price Model in Epi](#abstraction-price-model-in-epi)
+    - [Relationship between Guest, User and Market, Currency. The flow from Guest/User to Market/Currency](#relationship-between-guest-user-and-market-currency-the-flow-from-guestuser-to-marketcurrency)
+  - [Some requirements in some real projects](#some-requirements-in-some-real-projects)
+  - [Notes from Quan Mai's book](#notes-from-quan-mais-book)
+  - [Flow working with Find in real application](#flow-working-with-find-in-real-application)
+  - [What happen when user add to cart, change quantity, remove item in code](#what-happen-when-user-add-to-cart-change-quantity-remove-item-in-code)
+  - [What code flow in checkout](#what-code-flow-in-checkout)
+  - [Custom Workflow in commerce](#custom-workflow-in-commerce)
+  - [How promotion engine work](#how-promotion-engine-work)
+  - [How modeling product in real site and how to thinking in Episerver](#how-modeling-product-in-real-site-and-how-to-thinking-in-episerver)
 
 ## How to override, decorate the default implement of the class in EpiServer
 
@@ -217,6 +230,8 @@ public partial class MetalPriceImportPlugin : WebFormsBase
 
 **How to update progress to client user when task is processing**
 
+> Using static variable to store global data for thread reading/writing
+
 **Reference** 
 [How to create a nice looking admin plugin](https://world.episerver.com/blogs/Per-Nergard/Dates/2013/4/How-to-create-a-nice-looking-admin-plugin/)
 
@@ -250,12 +265,30 @@ private void Global_RoutesRegistered(object sender, RouteRegistrationEventArgs e
 }
 ```
 
-
 **Reference**
 
 https://vimvq1987.com/episerver-cms-performance-optimization-part-1/
 
 https://world.episerver.com/documentation/Release-Notes/ReleaseNote/?releaseNoteId=CMS-7791
+
+
+## Performance issue with Async keyword when call api
+
+i think when ha bui implemented OWIN, we have custom pipeline
+and maybe too much code is running on every request - including images & api requests
+with async, we have some waiting/blocking in a lot of requests - so everything is getting very slow/very bad
+
+it seems hard to understand
+beyond me i think...
+in the picture - see preexecuterequesthandler, takes 400ms
+that is very very bad
+
+so api requests taking 600 ms, should be 200ms (edited) 
+i think if we understand, easy fix - but needs big understanding first...
+but i think if it does get fixed, we save 70% performance
+which could be crazy fast
+
+[PreExecuteRequestHandler delay on Web Api](https://discuss.newrelic.com/t/preexecuterequesthandler-delay-on-web-api/52621/10)
 
 
 ## There are three ways to identify an catalog entries (products, variations, bundles, packages...)
@@ -313,3 +346,154 @@ Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-lib
 
 * [How To Load And Retrieve A Variant Or Product From Episerver Commerce](http://www.jondjones.com/learn-episerver-cms/episerver-commerce/how-to-load-and-retrieve-a-variant-or-product-from-episerver-commerce)
 * [Catalog content provider](https://world.episerver.com/documentation/developer-guides/commerce/catalogs/catalog-content/Catalog-content-provider/)
+
+## How to create Commerce Site with Epi Commerce
+
+### Set/get prices flow
+
+* How Epi commerce store price for each variant
+  * Relationship with Market, Currency, Variant Code (SKU), Customer Group (Sale Code), Sale Type, 
+  * Setup list prices
+* How get prices: IPriceValue, Mediachase IPriceService, IPromotionService
+* Create flow diagram from QuickSilver to illustrate
+
+What default services Epi Commerce provide?
+
+`IPriceService` (The readonly get price service) using `PriceFilter` -> to get original price
+`IPriceDetailService` (The service for update price)
+
+`IPromotionEngine, IPromotionEngineExtensions` to get discounted price
+
+#### Abstraction Price Model in Epi
+
+Epi Price Object include:
+* Market
+* Currency
+* Sale Type (CustomerPricing)
+* Sale Code
+* Price Amount
+* Min Quantity
+* StartDate, EndDate
+
+Using PriceFilter (Currency, Quantity, CustomerPricing = Sale Type  + Sale Code) to get prices by IPriceService
+
+**In real application**
+
+How to get original price (or sale price) using `IPriceService` and `PriceFilter`
+
+For Guest
+
+* Guest -> 
+  * Default Market + Default Currency -> 
+    * Default Sale Type = "All customers" (let Sale Code is empty) -> 
+      * Quantity -> 
+        * List prices -> 
+          * Get lowest price
+
+
+> Snippet code for each step
+
+For Logged in User
+
+* Logged in User => 
+  * Depend on business -> Get Market form User/Organization (by Prefers Address country code) -> 
+    * Get Currency (from the Market's default currency or Contact's Prefers Currency) -> 
+      * Add default sale code + customer sale code (form "CustomerGroup" meta field of Contact) -> 
+        * Add Quantity -> 
+          * List prices -> 
+            * Get lowest price
+
+> Show snippet code for each step side by side
+
+How to get discounted price using `IPromotionEngineExtensions`
+
+> Best practices: Should wrap the default PriceService, and PromotionEngine with our `IPricingService` and `IPromotionService`
+
+**Scenario** Using the "CustomerGroup" meta field or `EffectiveCustomerGroup` property of `Contact` entity
+1. There are some special customers who are offered the better price than normal. In this case, those customers should belong a special group ex VIP, or Loyal Group and we will set a lower price for those group.
+   > Note you must to set price is lower than price in Sale Type is All customers
+
+2. In Royalmint project, there is a requirement when user be checkout progress, they change deliver address to the region where don't be charged the tax. Ex UK has tax of 20% in mean while US has no tax. So the price for US market will be lower than other market. This requirement should be regard to multi store
+
+### Relationship between Guest, User and Market, Currency. The flow from Guest/User to Market/Currency
+
+What default services Epi Commerce provide?
+
+For Market: `ICurrentMarket` and `IMarketService`
+
+How to get/set Market and Currency for
+
+Guest -> go to commerce site -> see price and discounted price
+
+* Guest -> 
+  * Get Default Market (The default market in epi has name "DEFAULT" was set in `MarketId` class. Must setting the default market in Commerce Manager) -> 
+    * Get Default Currency from this Market (Each market must have unique default currency which was set in Commerce Manager)
+
+Guest -> register -> User -> see price and discounted price
+
+* Guest ->
+  * Register -> Set Prefers Shipping Address + Prefers Billing Address
+    * Create contact
+      * Login
+        * Update Market...
+
+> Depend on business, user can set prefers currency or get default one from market
+
+> In real application, there is often case in which the default market based on guest's location or user's address. The market and currency will be store in Cookie or one customer' metal field
+
+> Best practices: Should have our `CurrentMarket` and `CurrentCurrency` be implemented by yourself
+
+## Some requirements in some real projects
+
+1. Bullion - Multi shipments: 
+2. Bullion - Multi carts
+3. Ralawise - Catalog Model - Custom to show basket (Product Group -> Product Color -> Variant) -> Add variant -> show product group on basket
+4. Royalmint -> Price not Vat depend on deliver address
+5. Ralawise - Custom price system -> Custom DB ->  a lot price with a lot of Sale Codes for each variant
+6. Royalmint -> Integrate the third party tool to personalization for each product -> custom price
+7. EpiFind -> how index price for the system which have the custom price (Get price from other source instead Epi Commerce)
+8. Email back to stock
+9. Migration: Import data from an old system
+10. Bullion: Should not using DDS in Schedule job especial when you have plan deploy to DXC
+
+## Notes from Quan Mai's book
+
+We’ll see how markets are used. The market concept affects almost every aspect of Episerver Commerce.
+
+* As from previous chapter, we’ve learned that an entry might or might not be available in a market. This is defined by a special metafield named _ExcludedCatalogEntryMarkets. This
+contains list of MarketId which the entry is not available in _ExcludedCatalogEntryMarkets
+metafield.
+
+* Markets also control the prices: a price must belong to a market. Warehouses and inventories, however, are not tied to any markets (which is reasonable because a warehouse might serve more than 1 markets)
+
+* Orders must belong to specific markets. Shipping methods and payment gateways also need
+to be available in a specific market, however, they are still grouped by languages. This was because of backward compatibility reasons, and in the future versions shipping methods and payment gateways might be changed to be grouped by markets.
+
+**You should only define new market since you know actually this market need for what.**
+
+>  When define new market in Commerce, you should aware it may be impact the price and causes some unexpected behaviors. Actually, your code flow when working with Market and Currency is the root cause rather than the Epi market itself don't causes those behaviors. 
+> 
+> For example, in my project of company, our customer defined two way get currency, one get from Contact's prefers currency, other one get from Market's default currency. 
+
+> Our CM has only one default market: UK with default currency GBP.
+> 
+> Then user --> registered has address in US with prefers currency is USA ->in our code we let user in Default Market (UK), so this user will be see the price in GBP (fine with end client and as customer's expected)
+>
+> Later, someone define new US market, may be for testing purpose and forget delete it.
+> 
+> Other user also registered in US (USA) -> in our code we let user in US market ---> user will be see price in USA but we don't setup price in this market -> actual result user see price is 0 in GBP -> unexpected result
+
+
+## Flow working with Find in real application
+
+## What happen when user add to cart, change quantity, remove item in code
+
+## What code flow in checkout
+
+## Custom Workflow in commerce
+
+## How promotion engine work
+
+## How modeling product in real site and how to thinking in Episerver
+
+
