@@ -49,5 +49,5 @@ Add an environment variable called `NODE_PATH` and set it to `%USERPROFILE%\Appl
 
 [https://stackoverflow.com/questions/9587665/nodejs-cannot-find-installed-module-on-windows](https://stackoverflow.com/questions/9587665/nodejs-cannot-find-installed-module-on-windows)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzExNTcyOTcxXX0=
+eyJoaXN0b3J5IjpbLTEzODA4NDEzNTMsMzExNTcyOTcxXX0=
 -->
