@@ -3,6 +3,7 @@
 - [NodeJS Notes](#nodejs-notes)
   - [Install/Uninstall node js on Window](#installuninstall-node-js-on-window)
   - [Using global modules on Window](#using-global-modules-on-window)
+  - [What's difference between Concurrency and Parallelism](#whats-difference-between-concurrency-and-parallelism)
 
 ## Install/Uninstall node js on Window
 
@@ -51,3 +52,16 @@ Add an environment variable called `NODE_PATH` and set it to `%USERPROFILE%\Appl
 <!--stackedit_data:
 eyJoaXN0b3J5IjpbLTEzODA4NDEzNTMsMzExNTcyOTcxXX0=
 -->
+
+
+## What's difference between Concurrency and Parallelism
+
+**Concurrency** in very simple terms means that two or more processes (or threads) run together, *but not at the same time*. Only one process executes at once.
+
+**Parallelism** on the other hand means that the processes (or threads) run in parallel (surprise surprise); meaning they start at the same time and *execute alongside each other at the same time.*
+
+![Concurrency vs Parallelism](images/concurrency_and_parallelism.jpeg)
+
+**Reference**
+
+[Node.JS Concurrency with Async/Await and Promises!](https://medium.com/platformer-blog/node-js-concurrency-with-async-await-and-promises-b4c4ae8f4510)

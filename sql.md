@@ -6,10 +6,12 @@ Listing all useful scripts
   - [Get database size](#get-database-size)
   - [Using `ROW_NUMBER()` and `MIN()` to select first row in each group when using group clause](#using-row_number-and-min-to-select-first-row-in-each-group-when-using-group-clause)
   - [Concat list values to string delimited BY char](#concat-list-values-to-string-delimited-by-char)
+  - [Delete SQL log file](#delete-sql-log-file)
   - [Delete duplicate rows from a table](#delete-duplicate-rows-from-a-table)
 
 ## Get database size
 
+```sql
     with fs
     as
     (
@@ -22,10 +24,11 @@ Listing all useful scripts
         (select sum(size) from fs where type = 1 and fs.database_id = db.database_id) LogFileSizeMB
     from sys.databases db
     order by DataFileSizeMB desc
-
+```
 
 ## Using `ROW_NUMBER()` and `MIN()` to select first row in each group when using group clause
 
+```sql
     /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
     select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
     		Contact.ID as ContactID, 
@@ -39,9 +42,11 @@ Listing all useful scripts
     
     /* Using MIN() to select first row in each group */
     (select MIN(#TempContact.RowNum) as ld from #TempContact group by PICCode))
+```
 
 ## Concat list values to string delimited BY char
 
+```sql
     /* Concat list values in GROUP to string delimited BY char */
     DECLARE @List VARCHAR(8000)
     
@@ -50,9 +55,10 @@ Listing all useful scripts
     WHERE  EmpID = 23
     
     SELECT @List
+```
 
- ## Delete SQL log file
-
+## Delete SQL log file
+```sql
     USE [Database_Name]
     GO
     
@@ -63,9 +69,9 @@ Listing all useful scripts
     
     dbcc shrinkfile(@dblog_filename,1);
     GO
-
+```
 ## Delete duplicate rows from a table
-
+```sql
     WITH cte AS (
         SELECT 
             contact_id, 
@@ -87,3 +93,4 @@ Listing all useful scripts
     )
     DELETE FROM cte
     WHERE row_num > 1;
+```

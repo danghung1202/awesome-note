@@ -36,7 +36,7 @@ Even better, make a lint rule for detecting observables that are not unsubscribe
 
 **Before**
 
-```
+```typescript
 iAmAnObservable
     .pipe(
        map(value => value.item)     
@@ -48,7 +48,7 @@ iAmAnObservable
 
 Using `takeUntil` when you want to listen to the changes until another observable emits a value:
 
-```
+```typescript
 private _destroyed$ = new Subject();
 
 public ngOnInit (): void {
@@ -84,3 +84,31 @@ Other than is like saying except or except for
     He said he doesn't own any property other than his home
 
 I'm sorry I'm not better with technical definitions...😬
+
+## Dom Api
+
+But it’s still verbose!
+
+If you are still worried about extra keystrokes you can alias both methods:
+```javascript
+    const $ = document.querySelector.bind(document);
+    $('#container');
+
+    const $$ = document.querySelectorAll.bind(document);
+    $$('p');
+```
+
+### MutationObserver 
+
+You can observe changes to any DOM node through the MutationObserver interface. This includes text changes, nodes being added to or removed from the observed node or changes to the node’s attributes.
+
+The MutationObserver is an incredibly powerful API to observe virtually any change that occurs on a DOM element and its child nodes.
+
+A new MutationObserver is created by calling its constructor with a callback function. This callback will be called whenever a change occurs on the observed node:
+
+    const observer = new MutationObserver(callback);
+
+
+**Reference**
+
+[Using the DOM like a Pro](https://itnext.io/using-the-dom-like-a-pro-163a6c552eba)

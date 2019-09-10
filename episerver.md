@@ -45,7 +45,7 @@ In this class, all methods are decorated with `virtual` keyword like that
 
 So in this way, in IOC configuration using StructureMap, you can override and decorate this class with this configuration:
 
-```
+```csharp
     public void ConfigureContainer(ServiceConfigurationContext context)
         {
             context.StructureMap().Configure(ce =>
@@ -80,7 +80,7 @@ Luckily, this class is registered via IOC, we have a chance to do it.
 
 Registered via IOC the new implement class same above
 
-```
+```csharp
 public void ConfigureContainer(ServiceConfigurationContext context)
         {
             context.StructureMap().Configure(ce =>
@@ -93,7 +93,7 @@ public void ConfigureContainer(ServiceConfigurationContext context)
 
 The key technical step in this way: Inject `IPriceService` itself to new implement class and StructureMap will do the remain, **injecting the instance of the default implement class to using in the new implement class**
 
-```
+```csharp
 public class TrmPriceService : IPriceService
     {
         private readonly IPriceService _mediachasePricingService;
@@ -139,7 +139,7 @@ Unluckily, the `DecorateAllWith` somehow is not working as my expected. I don't 
 2. Using StructureMap's `Add` method to add the old default implement with a special name
 3. Using StructureMap's `Use` method to register new default implement for the interface with `.Ctor` to inject the old implement to new implement
 
-```
+```csharp
 ce.For<IAmStoreHelper>().ClearAll();
 ce.For<IAmStoreHelper>().Add<StoreHelper>().Named(nameof(StoreHelper));
 ce.For<IAmStoreHelper>().Use<MyStoreHelper>().Ctor<IAmStoreHelper>()
@@ -148,7 +148,7 @@ ce.For<IAmStoreHelper>().Use<MyStoreHelper>().Ctor<IAmStoreHelper>()
 
 Now i have the same result since using `DecorateAllWith`
 
-```
+```csharp
 public class MyStoreHelper : IAmStoreHelper
     {
         private readonly IAmStoreHelper _storeHelper;
@@ -308,7 +308,7 @@ Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-lib
 
 1. Get cms `ContentLink` from commerce `Code`
 
-```
+```csharp
     var referenceConverter = ServiceLocator.Current.GetInstance<ReferenceConverter>();
 
     var code = "variant-code"; 
@@ -317,7 +317,7 @@ Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-lib
 
 2. Get cms `ContentLink` from commerce `Id`
 
-```
+```csharp
     var referenceConverter = ServiceLocator.Current.GetInstance<ReferenceConverter>();
     var commerceId = 22;
     var workId = 0;
@@ -327,7 +327,7 @@ Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-lib
 
 3. Get commerce `Id` from cms `ContentLink`
 
-```
+```csharp
     var contentLink = new ContentReference(4);
     var referenceConverter = ServiceLocator.Current.GetInstance<ReferenceConverter>();
 
@@ -336,7 +336,7 @@ Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-lib
 
 4. Get commerce `Code` from cms `ContentLink`
 
-```
+```csharp
     var contentLoader = ServiceLocator.Current.GetInstance<IContentLoader>();
 
     var entry = contentLoader.Get<EntryContentBase>(entryContentLink)?.Code;
@@ -390,6 +390,13 @@ For Guest
         * List prices -> 
           * Get lowest price
 
+```mermaid
+    graph TD
+     Guest-->Site(Default Market + Default Currency)
+     Site-->SaleType(Default Sale Type = All Customer)
+     SaleType-->Quantity
+
+```
 
 > Snippet code for each step
 
@@ -455,6 +462,8 @@ Guest -> register -> User -> see price and discounted price
 8. Email back to stock
 9. Migration: Import data from an old system
 10. Bullion: Should not using DDS in Schedule job especial when you have plan deploy to DXC
+11. Bullion: using IQueryable (for reuseable query later) and IEnumerable in EF
+12. How force epi cms using Our custom Media File instead the default image 
 
 ## Notes from Quan Mai's book
 

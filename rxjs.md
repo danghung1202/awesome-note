@@ -6,16 +6,10 @@ Some my understanding regard to Rxjs Operators, how it work and how to apply to 
   - [combineAll](#combineall)
   - [combineLatest](#combinelatest)
   - [concatMap](#concatmap)
-  - [Find Differences between Unicast and Multicast](#find-differences-between-unicast-and-multicast)
-  - [forkJoin](#forkjoin)
-  - [RxJs_Cache](#rxjs_cache)
-  - [Subject and BehaviorSubject](#subject-and-behaviorsubject)
-  - [switchMap](#switchmap)
-  - [Access property without using subscribe](#access-property-without-using-subscribe)
   - [Difference between Rxjs Subject and Observable](#difference-between-rxjs-subject-and-observable)
 
 ## combineAll
-
+```javascript
     // https://stackoverflow.com/questions/40533016/angular2-chain-http-requests-with-concat
     // Mocks an http call that takes 1 second to complete
     function fakeRequest(id) {
@@ -42,12 +36,13 @@ Some my understanding regard to Rxjs Operators, how it work and how to apply to 
        // Get back an array with the results from every call, just take the last one
        // if you really need it
       .subscribe((val) => console.log(val));
-
+```
 
 ## combineLatest
 
 You have many Observable, when each one of these emit value, we want to combine all lastest values from these streams
 
+```javascript
     this.subSelectedFilter = Observable.combineLatest(this.selectedThemes, this.selectedSubthemes, this.selectedYears,
                 (themes, subthemes, years) =>
                     ({
@@ -58,7 +53,7 @@ You have many Observable, when each one of these emit value, we want to combine 
                 .subscribe(result => {
                     this.params = result;
                 });
-
+```
 ## concatMap
 
 I have one existing `Observable`, and I want to start a new Observable for each value and emit the values from each nested Observable in
@@ -69,7 +64,7 @@ you can use `concatMap()`
 For more detail: 
 
 https://stackoverflow.com/questions/39566268/angular-2-rxjs-how-return-stream-of-objects-fetched-with-several-subsequent/39578646
-
+```javascript
     //Example
     //Has order
     Observable.from([param1, param2, ..., param_n])
@@ -79,7 +74,7 @@ https://stackoverflow.com/questions/39566268/angular-2-rxjs-how-return-stream-of
                 })
                 .subscribe(response => console.log(response)) 
                 //console log response right after each request is complete
-    
+ ```   
 In fact there is the case you want to combine all results of all requests after all is complete
 In that case using `combineAll()`, look at combineAll section in this gist
 
@@ -87,13 +82,14 @@ In contrast, the `mergeMap()` will excute requests in random order
 
 Has no order
 
+```javascript
     Observable.from([param1, param2, ..., param_n])
                 .mergeMap(param => excute_async_request(param))
                 .map(response => {
                   //do something with response
                 })
                 .subscribe()
-
+```
 ## Find Differences between Unicast and Multicast
 
 What is a Subject? An RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers. 
@@ -115,11 +111,12 @@ If I have one existing Observable, and I want to share a subscription between mu
 
 Example using share()
 
+```javascript
     const stream$ = Observable.fromEvent(this.searchInput.nativeElement, 'keydown').share()
     const subscription1 = stream$.filter().map().subscribe(x => do something 1);
     const subscription2 = stream$.filter().map().subscribe(x => do something 2);
     const subscription3 = stream$.filter().map().subscribe(x => do something 3);
-
+```
 ## forkJoin
 
 I have some Observables to combine together as one Observable, and I want to be notified when all of them have completed.
@@ -127,7 +124,7 @@ I have some Observables to combine together as one Observable, and I want to be 
 In real application, if there are two or many asyn requests (parallel) and we want to do something after all these requests is completed, we can use forkJoin for this case
 
 Example
-
+```javascript
     
     Observable.forkJoin([
               Async_Request_0,
@@ -148,11 +145,13 @@ Example
             .catch(error => {
                 return this.handleError(error);
             });
+```
 
 ## RxJs_Cache
 
 Using cache in Observable
 
+```javascript
     private _themes: any = null;
     getThemes(): Observable<Theme[]> {
       if (!this._themes) {
@@ -166,38 +165,39 @@ Using cache in Observable
       }
       return this._themes;
     }
-
+```
 
 ## Subject and BehaviorSubject
 
 For `Subject` object, all values was sent before subscriber is not delivered to that subscriber
-
+```javascript
     const subject = new Rx.Subject();
     subject.next(1);
     subject.subscribe(x => console.log('a',x));
     subject.next(2);
     subject.next(3);
     //output: 2,3
-    
+```   
 For `BehaviorSubject` object, one previous value still delivery to subscriber although this subscriber is declare later
-
+```javascript
     const bsubject = new Rx.BehaviorSubject();
     bsubject.next(1);
     bsubject.subscribe(x => console.log(x));
     bsubject.next(2);
     bsubject.next(3);
     //output: 1,2,3
-    
+```
 Incase you want to more one previous values are delivered to late subscriber, using `ReplaySubject`.
 
+```javascript
     const replay = new ReplaySubject(number_of_previous_item_will_be_delivery)
-
+```
 ## switchMap
 
 In real application, example the auto suggestion in search box, each user type keyword,there is one async request to get result for that keyword. It means each user type one character, there is new keyword and there is one async request. The problem is user type very fast so there are many requests since user search. So we want to only last result of last request is processed.
 
 Using `swichMap()` can resolve this.
-    
+```javascript   
     Observable.from([param1, param2, ..., param_n])
                 // only request take parma_n (last param) is processed, the previous requests is abort
                 .switchMap(param => excute_async_request(param)) 
@@ -205,9 +205,11 @@ Using `swichMap()` can resolve this.
                   //do something with response
                 })
                 .subscribe(response => console.log(response))
+```
 
 ## Access property without using subscribe
 
+```javascript
     //Suppose you have a Observable object
     interface GameModel
     {
@@ -222,7 +224,7 @@ Using `swichMap()` can resolve this.
           return (current && current.get('invalid')) || accum;
         }, false);
     }
-
+```
 
 
 ## Difference between Rxjs Subject and Observable
