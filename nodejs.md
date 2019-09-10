@@ -4,6 +4,10 @@
   - [Install/Uninstall node js on Window](#installuninstall-node-js-on-window)
   - [Using global modules on Window](#using-global-modules-on-window)
   - [What's difference between Concurrency and Parallelism](#whats-difference-between-concurrency-and-parallelism)
+  - [Export Module in Node.js](#export-module-in-nodejs)
+    - [CommonJS](#commonjs)
+    - [ES6 syntax](#es6-syntax)
+  - [A little ECMAScript glossary](#a-little-ecmascript-glossary)
 
 ## Install/Uninstall node js on Window
 
@@ -65,3 +69,136 @@ eyJoaXN0b3J5IjpbLTEzODA4NDEzNTMsMzExNTcyOTcxXX0=
 **Reference**
 
 [Node.JS Concurrency with Async/Await and Promises!](https://medium.com/platformer-blog/node-js-concurrency-with-async-await-and-promises-b4c4ae8f4510)
+
+
+## [Export Module in Node.js](https://www.tutorialsteacher.com/nodejs/nodejs-module-exports)
+
+### CommonJS
+
+The **`module.exports`** or **`exports`** is a special object which is included in every JS file in the Node.js application by default. `module` is a variable that represents current module and `exports` is an object that will be exposed as a module. So, whatever you assign to `module.exports` or `exports`, will be exposed as a module.
+
+**Export Object**
+
+```javascript
+module.exports.log = function (msg) { 
+    console.log(msg);
+};
+
+module.exports.logLevel = "Error";
+
+//or 
+
+module.exports = {
+    log: function (msg) { 
+        console.log(msg);
+    },
+    logLevel: "Error"
+}
+
+//or using exports object has the same result
+
+exports.log = function (msg) { 
+    console.log(msg);
+};
+```
+
+```javascript
+var msg = require('./Log.js');
+
+msg.log('Hello World');
+
+//or
+
+const {log, logLevel} = require('./Log.js');
+
+```
+
+**Export Function**
+
+```javascript
+module.exports = function (msg) { 
+    console.log(msg);
+};
+
+var msg = require('./Log.js');
+
+msg('Hello World');
+```
+
+**Export function as a class**
+
+```javascript
+module.exports = function (firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.fullName = function () { 
+        return this.firstName + ' ' + this.lastName;
+    }
+}
+
+var person = require('./Person.js');
+
+var person1 = new person('James', 'Bond');
+
+console.log(person1.fullName());
+```
+### ES6 syntax
+
+using `export` keyword
+
+
+```javascript
+export function foo() {
+  return 'bar';
+}
+export function bar() {
+  return 'foo';
+}
+
+//importing
+import {foo, bar} from 'foobar';
+console.log(foo());
+console.log(bar());
+
+```
+
+> The key difference between CommonJS and ES6 is the way to load other module via `require` keyword
+
+In CommonJS
+
+```mermaid
+    graph TD
+        A(call require func)-->B(synchronously loads the content of module file)
+        B-->C(synchronously parses and compiles the JavaScript code)
+        C-->D(and synchronously evaluates the code)
+        D-->F(returning the value of module.exports)
+        F-->G(the shape of the module is known and can be used)
+```
+
+in ES6
+
+>ES6 modules are loaded, resolved and evaluated asynchronously
+
+```mermaid
+    graph TD
+    A(asynchronously loading the contents of the file)-->B(parsing file content)
+    A-->C(While parsing,  the shape of the module as defined)
+    C-->D(is determined prior to evaluating the code)
+    D-->F( the code is then evaluated)
+    B-->F
+
+```
+
+> The shape of the module as defined sound like that the module's interface is known before implementing of this module is actually loaded
+
+**Reference**
+
+[An Update on ES6 Modules in Node.js](https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+
+## [A little ECMAScript glossary](https://2ality.com/2011/06/ecmascript.html)
+
+ECMAScript: 
+
+Sun (now Oracle) had a trademark on the name “Java” and therefore also on the name “JavaScript”. That led to Microsoft calling its JavaScript dialect “JScript”. Thus, when it came to finding an official name for the language, “JavaScript” could not be used. “ECMAScript” was chosen, because the corresponding standard is hosted by Ecma International (see below). Usually, the terms “ECMAScript” and “JavaScript” are interchangeable. If JavaScript means “ECMAScript as implemented by Mozilla and others” then ECMAScript is the standard and JavaScript one of its implementations. The term “ECMAScript” is also used to describe language versions: ECMAScript 3, ECMAScript 5, etc.
+
+> ECMAScript versus JavaScript. ECMAScript is the language standard. JavaScript is one implementation, Microsoft’s JScript is another one.

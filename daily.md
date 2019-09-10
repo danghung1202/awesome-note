@@ -112,3 +112,54 @@ A new MutationObserver is created by calling its constructor with a callback fun
 **Reference**
 
 [Using the DOM like a Pro](https://itnext.io/using-the-dom-like-a-pro-163a6c552eba)
+
+
+## [JavaScript Module Pattern Basics](https://coryrylan.com/blog/javascript-module-pattern-basics)
+
+The Module Pattern is one of the most common design patterns used in JavaScript and for good reason. 
+
+The module pattern is easy to use and creates encapsulation of our code. 
+
+Modules are commonly used as singleton style objects where only one instance exists. The Module Pattern is great for services and testing/TDD. 
+
+**Creating a module**
+
+```javascript
+(function() {
+  'use strict';
+  // Your code here
+  // All function and variables are scoped to this function
+}());
+```
+
+This pattern is well known as a Immediately Invoked Function Expression or IIFE. 
+
+**Exporting our module**
+
+```javascript
+    var myModule = (function(globalVariable) {
+    'use strict';
+
+    var _privateProperty = 'Hello World';
+    var publicProperty = 'I am a public property';
+
+    function _privateMethod() {
+        console.log(_privateProperty);
+    }
+
+    function publicMethod() {
+        _privateMethod();
+    }
+        
+    return {
+        publicMethod: publicMethod,
+        publicProperty: publicProperty
+    };
+    }(globalVariable));
+    
+    myModule.publicMethod();    		        // outputs 'Hello World'   
+    console.log(myModule.publicProperty);       // outputs 'I am a public property'
+    console.log(myModule._privateProperty);     // is undefined protected by the module closure
+    myModule._privateMethod();                  // is TypeError protected by the module closure
+
+```

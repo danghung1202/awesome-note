@@ -118,14 +118,16 @@ Following this way, you can decorate the default implement of any method ex add 
 ### **Update**: Unexpected case
 I've just see a weird case when trying DecoratorAllWith a service class. In my case, the default implement class was registered via IOC using EpiServer `ServiceConfigurationAttribute` like that
 
+```csharp
     [ServiceConfiguration(typeof(IAmStoreHelper), Lifecycle = ServiceInstanceScope.Singleton)]
     public class StoreHelper : IAmStoreHelper
     {
     }
+```
 
 I need the interface `IAmStoreHelper` is decorator all with `MyStoreHelper` and the default implement don't use any `virtual` keyword, so I do it via EpiServer's `ConfigurableModule` with `[ModuleDependency(typeof(ServiceContainerInitialization))]` to make sure that my implement class will be registered after default implement
 
-```
+```csharp
 context.StructureMap().Configure(ce =>
     {
         ce.For<IAmStoreHelper>().Use<StoreHelper>();
@@ -179,7 +181,7 @@ You can create EpiServer admin tool using Mvc template or `.aspx` template. In c
 
 `AdminTool.aspx`
 
-```
+```html
 <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="MetalPriceImportPlugin.aspx.cs" Inherits="TRM.Web.Plugins.MetalPriceImportPlugin" %>
 
 <%@ Register TagPrefix="EPiServerUI" Namespace="EPiServer.UI.WebControls" Assembly="EPiServer.UI" %>
@@ -203,7 +205,7 @@ You can create EpiServer admin tool using Mvc template or `.aspx` template. In c
 ```
 
 `AdminTool.aspx.cs`
-```
+```csharp
 [GuiPlugIn(
     DisplayName = "Import Metal Price",
     Area = PlugInArea.AdminMenu,
@@ -244,7 +246,7 @@ An our customer found this issue when he investigated the performance issues on 
 
 All code for register custom routers need to make sure run firstly before the below code
 
-```
+```csharp
 public void Initialize(InitializationEngine context)
 {
     //Register custom routers here
