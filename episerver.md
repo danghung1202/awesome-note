@@ -230,7 +230,96 @@ public partial class MetalPriceImportPlugin : WebFormsBase
 
 **Using ThreadPool**
 
+Plugin need to inherit from `System.Web.UI.ICallbackEventHandler` and implement the `GetCallbackResult()` to return data to callback call
+
+```csharp
+using System.Web.UI;
+public partial class MetalPriceImportPlugin : WebFormsBase, ICallbackEventHandler
+{
+    //using static variable to store work's status
+    private static WhateverClass _workStatus;
+
+    //Need to inject the callback javascript function
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        var callbackScript =
+                $"function PluginDoCallback(callbackArgument, completedCallback){{ \n{Page.ClientScript.GetCallbackEventReference(this, "callbackArgument", "completedCallback", null, true)};\n}}";
+            Page.ClientScript.RegisterClientScriptBlock(GetType(), "PluginDoCallback", callbackScript, true);
+
+        //If we are doing a callback we don't need to process anymore information from page. 
+        if (IsCallback)
+        {
+            return;
+        }  
+    }
+
+    protected void StartLongTaskButton_OnClick(object sender, EventArgs e)
+    {
+        _workStatus = new WhateverClass()
+
+        EPiServer.Security.PrincipalInfo.RecreatePrincipalForThreading();
+        ThreadPool.QueueUserWorkItem(new WaitCallback(LongTaskThread), _workStatus);
+
+        ScriptManager.AddEventListener(this, EventType.Load, "function(){DoUpdateCallback();}");
+    }
+
+    public string GetCallbackResult()
+    {
+        Page.Response.ContentType = "application/json";
+        var sbJson = new StringBuilder();
+        sbJson.Append("{");
+        //Build json body here from _workStatus field
+        sbJson.AppendLine("}");
+        return sbJson.ToString();
+    }
+
+}
+```
+
+in `aspx` file
+
+```html
+
+<asp:content contentplaceholderid="HeaderContentRegion" runat="server">
+    <script type="text/javascript">
+        //Function to send callback information back to server.
+        //Wrapped in a function so you can send callback arguments..if you need  to.
+        function DoUpdateCallback(callbackArgument) {
+            PluginDoCallback(callbackArgument, _OnCallbackComplete);
+        }
+
+        //Response from server side with data from importer as a JSON object.
+        //The result get from GetCallbackResult() in cs file
+        function _OnCallbackComplete(result, context) {
+            var parsedResult = null;
+            //Eval JSON object.
+            eval("parsedResult = " + result);
+            //Writes progress of exporter
+            if (parsedResult["IsDone"] == false) {
+                //do other works when job isn't finish
+                document.body.style.cursor = 'wait';
+                window.setTimeout("DoUpdateCallback()", 1000);
+            } else {
+                document.body.style.cursor = '';
+                //do other works when job done
+                <%= Page.ClientScript.GetPostBackEventReference(new PostBackOptions(this))%>;
+            }
+        }
+        
+    </script>
+</asp:content>
+
+```
+
 **How to update progress to client user when task is processing**
+
+```mermaid
+    graph TD
+    A(Button click)-->B(Call handler click)
+    B-->C(Inside handler, call js code to callback)
+    C-->D(in js, repeated execute this callback to refresh view)
+    D-->F(until the process done)
+```
 
 > Using static variable to store global data for thread reading/writing
 
