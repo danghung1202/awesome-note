@@ -202,3 +202,6 @@ ECMAScript:
 Sun (now Oracle) had a trademark on the name “Java” and therefore also on the name “JavaScript”. That led to Microsoft calling its JavaScript dialect “JScript”. Thus, when it came to finding an official name for the language, “JavaScript” could not be used. “ECMAScript” was chosen, because the corresponding standard is hosted by Ecma International (see below). Usually, the terms “ECMAScript” and “JavaScript” are interchangeable. If JavaScript means “ECMAScript as implemented by Mozilla and others” then ECMAScript is the standard and JavaScript one of its implementations. The term “ECMAScript” is also used to describe language versions: ECMAScript 3, ECMAScript 5, etc.
 
 > ECMAScript versus JavaScript. ECMAScript is the language standard. JavaScript is one implementation, Microsoft’s JScript is another one.
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTY5NjE5MDc2MF19
+-->
