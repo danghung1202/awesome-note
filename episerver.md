@@ -586,7 +586,80 @@ to be available in a specific market, however, they are still grouped by languag
 
 ## Flow working with Find in real application
 
+when index, scan all content, some fields/content are unnecessary (may be so ), should ignore in Find -> How to ignore -> init module or attribute (json ignore)
+
+Facet -> 2 types -> terms and range, is created from the result
+
+autocomplete -> remember keyword
+
+apply bet bet
+
+Fi
+bullion: 
+
+
 ## What happen when user add to cart, change quantity, remove item in code
+
+```mermaid
+    graph LR
+    A(Click to add basket)--variant code, <br> quantity-->B{Check if item <br/> be in cart}
+    B--new item-->C(Create new item)
+    B-->|old item|D(change quantity)
+    C-->E
+    D-->E(Begin validate cart)
+    E-->F(Validate line item: <br>  -product is active<br>-valid date range,<br>-entry available in market)
+    F-->G(Update placed price: <br> -check if the product price has changed <br>-update price)
+    G-->H(Apply discount)
+    H-->J(Update inventory)
+    J-->K(Save cart)
+
+```
+
+```csharp
+    public Dictionary<ILineItem, List<ValidationIssue>> ValidateCart(ICart cart)
+    {
+        if (cart.Name.Equals(DefaultWishListName))
+        {
+            return new Dictionary<ILineItem, List<ValidationIssue>>();
+        }
+
+        var validationIssues = new Dictionary<ILineItem, List<ValidationIssue>>();
+        cart.ValidateOrRemoveLineItems((item, issue) => validationIssues.AddValidationIssues(item, issue),
+        _lineItemValidator);
+                
+        cart.UpdatePlacedPriceOrRemoveLineItems(CustomerContext.Current.GetContactById (cart.CustomerId),
+        (item, issue) => validationIssues.AddValidationIssues(item, issue), 
+        _placedPriceProcessor);
+
+        cart.UpdateInventoryOrRemoveLineItems((item, issue) => validationIssues.AddValidationIssues(item, issue), 
+        _inventoryProcessor);
+
+        cart.ApplyDiscounts(_promotionEngine, new PromotionEngineSettings());
+
+        // Try to validate gift items inventory and don't catch validation issues.
+        cart.UpdateInventoryOrRemoveLineItems((item, issue) => {},
+        _inventoryProcessor);
+
+        return validationIssues;
+    }
+
+```
+
+```mermaid
+    graph LR
+    A(Order Group)-->|has many|B(Order Forms)
+    B-->|Has many|C(Shipments)
+    C-->|Has many|D(Line Item)
+    B-->|has many|E(Payments)
+    F(Credit Cart Payment)-->|inherits|E
+    C-->|has shipping address|G(Order Address)
+    E-->|has billing address|G
+    A-->|inherits|I(Extended Properties)
+    P(Payment Plan)-->|inherits|A
+    AC(Cart)-->|inherits|A
+    PO(Purchase Order)-->|inherits|A
+
+```
 
 ## What code flow in checkout
 
