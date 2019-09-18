@@ -22,6 +22,8 @@
   - [Custom Workflow in commerce](#custom-workflow-in-commerce)
   - [How promotion engine work](#how-promotion-engine-work)
   - [How modeling product in real site and how to thinking in Episerver](#how-modeling-product-in-real-site-and-how-to-thinking-in-episerver)
+  - [Metadata system](#metadata-system)
+  - [How integrate epi commerce with other systems](#how-integrate-epi-commerce-with-other-systems)
 
 ## How to override, decorate the default implement of the class in EpiServer
 
@@ -482,7 +484,7 @@ For Guest
           * Get lowest price
 
 ```mermaid
-    graph TD
+    graph LR
      Guest-->Site(Default Market + Default Currency)
      Site-->SaleType(Default Sale Type = All Customer)
      SaleType-->Quantity
@@ -668,5 +670,132 @@ bullion:
 ## How promotion engine work
 
 ## How modeling product in real site and how to thinking in Episerver
+
+**Step 1: How modeling Ralawise site in OOP design**
+
+```mermaid
+    graph LR
+    A(Catalog)-->|has many|B(Categories)
+    B-->|has many|C(Product Groups)
+    C-->|has many|D(Product Colors)
+    D-->|has many|E(Variant - SKU)
+
+```
+
+**Step 2: Mapping OOP design with catalog system of epi commerce**
+
+Episerver catalog system:
+
+Catalog components
+
+```mermaid
+    graph LR
+    O(Catalog System's components)-->A(Catalog entries)
+    A-->A1(Products <br> ProductContent)
+    A-->A2(Variants <br> VariationContent)
+    A-->A3(Bundles <br> BundleContent)
+    A-->A4(Packages <br> PackageContent)
+    O-->B(Catalog categories <br> NodeContent)
+
+```
+
+> If the catalog system is the heart of entire Episerver Commerce, the entries can be called the heart of the catalog system. In the end it’s the only thing your customers care about, right? And it might no be simple as you might think.
+
+Catalog Content Type name in Catalog UI and relation
+
+```mermaid
+    graph LR
+    A(Catalog Commerce Root)-->|has many|B(Catalog)
+    B-->|has many|C(Catalog Node)
+    C-->|has many|D
+    C-->|has many|C1(Other Catalog Node)
+    C1-->|has many|D(Catalog Entry)
+    B-->|has many|D
+
+```
+
+Mapping with Type name
+
+| Catalog Type  | Type Name                                                                   |
+| ------------- | --------------------------------------------------------------------------- |
+| Catalog Root  | RootContent                                                                 |
+| Catalog       | CatalogContent                                                              |
+| Catalog Node  | NodeContent                                                                 |
+| Catalog Entry | ProductContent <br> VariationContent <br> BundleContent <br> PackageContent |
+
+The following types are available when you create Commerce models.
+
+| Type name        | Description                      |
+| ---------------- | -------------------------------- |
+| VariationContent | A type for variant/SKU models    |
+| ProductContent   | A type for product models.       |
+| BundleContent    | A type for bundle models.        |
+| PackageContent   | A type for package models.       |
+| NodeContent      | A type for category/node models. |
+
+You should not inherit from the following types because they exist only to show various states in the system:
+
+| Type name        | Description                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| CatalogContent   | A type for catalog models.                                                                                 |
+| EntryContentBase | A base type for VariationContent, ProductContent, BundleContent, PackageContent and DynamicPackageContent. |
+| NodeContentBase  | A base type for NodeContent and CatalogContent.                                                            |
+| RootContent      | The virtual root in Episerver's hierarchical representation of Commerce content.                           |
+
+Catalog system's classes design
+
+```mermaid
+    graph LR
+    A(CatalogContentBase)-->|is base of|B(NodeContentBase)
+    B-->B1(RootContent)
+    B-->B2(CatalogContent)
+    B-->B3(NodeContent)
+    A-->|is base of|C(EntryContentBase)
+    C-->C1(ProductContent)
+    C-->C2(VariationContent)
+    C-->C3(BundleContent)
+    C-->C4(PackageContent)
+
+
+```
+
+Product: Well it’s a product. Normally, a Product is a place holder of information, it does not
+have inventories or prices for itself, so it’s not sell-able. (I’ve seen some customers sell products
+directly, it’s possible but it will be a lot more of works. I would suggest you to stick with the
+“standard” implementation instead). A product might have one or more variations.
+
+> There are Commerce sites which use Products as Variations, such as they have Prices on their own. Or some sites allow a Product to be the parent of other products. Those are possible, however, it’ll make the implementation harder. I would suggest to stick with the common way.
+
+Variation/SKU: A variation might have its own inventories and prices. In the end, it’s the thing your customers
+actually buy. However, it’s possible your variations have no products on their own (when each and
+every variation is unique and don’t share anything with other variation, it does not really make
+sense to have “products” here).
+
+Package: A package consists of two or more variations, which itself act as a variation. Think of
+a package as a collection of items. You might have Harry Potter books as seven variations, and
+then you have a collection of them as a package. Package has its own prices and inventories.
+Therefore, when you buy, you all of items as one. Customers should not have the ability to
+change the quantity or remove items from a package.
+
+Bundle: A bundle is just a collection of things you can add to the cart at once, but then they
+acts as individual items. They are something customers buy together, but are not forced to do
+so. You can change quantity of or remove items from the cart if you’d like to. Bundles have
+no prices or inventories of its own.
+
+## Metadata system
+
+To design dynamic entity to adapt with all kind of business
+
+```mermaid
+    graph TD
+    M(Metadata Plus)-->A(Catalog)
+    M-->B(Order)
+    M1(Metaclass)-->M
+
+```
+
+## How integrate epi commerce with other systems
+
+
 
 

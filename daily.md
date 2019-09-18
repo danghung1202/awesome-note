@@ -164,15 +164,15 @@ This pattern is well known as a Immediately Invoked Function Expression or IIFE.
 
 ```
 
-## Thumb Rules for async-await and promise
+## Thumb Rules for async-await and promise in javascript
 
 > Innovation: Async code -> Callback -> Promises -> Async/Await keyword
 
 ```mermaid
     graph TD
     A(Async code)-->|get value|B(using Callback)
-    B-->|too callback <br> callback hell|C(using Promises)
-    C-->D(using Async/Await keyword)
+    B-->|too callbacks <br> callback hell|C(using Promises)
+    C-->|beautiful code <br> look like sync code|D(using Async/Await keyword)
     D-->R(syntax and structure of your code <br> using async functions is much more like <br> using standard synchronous functions.)
 
 ```
@@ -288,3 +288,153 @@ asyncCall();
 
 > need to be understand the single thread - event loop in javascript runtime
 
+> Note: Async/await is slightly slower due to its synchronous nature. You should be careful when using it multiple times in a row as the await keyword stops the execution of all the code after it — exactly as it would be in synchronous code.
+
+
+## Web Performance Tool
+
+### Basic Terms
+
+TTFB - Time To First Byte
+First Paint (Start Render)
+Contentful Paint (First Meaningful Paint)
+Dom Init
+Dom Loaded
+Speed Index
+Page Load
+Fully Loaded
+
+
+### Some tips to improve
+
+## Entity Framework (EF) Migration
+
+### Auto migration
+
+Just using the code 
+
+`Database.SetInitializer(new MigrateDatabaseToLatestVersion<MyDBContext, MyDBConfiguration>());`
+
+```csharp
+    public class MyDBContext : DbContext
+    {
+        public MyDBContext() : base("Connection String Name")
+        {
+            Database.SetInitializer(new CreateDatabaseIfNotExists<MyDBContext>());
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<MyDBContext, MyDBConfiguration>());
+        }
+
+    }
+
+    public class MyDBConfiguration : DbMigrationsConfiguration<MyDBContext>
+    {
+        public MyDBConfiguration()
+        {
+            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationDataLossAllowed = true;
+            MigrationsDirectory = @"Migrations\MyDBContext";
+        }
+    }
+```
+
+### Manually migration (Migration Command)
+
+General flow migration command
+
+```mermaid
+    graph LR
+    A(Enable-Migration)-->B(Add-Migration)
+    B-->C(Update-Database)
+```
+
+| Command          | Description                                                                                     | Parameters                                                                                                                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enable-Migration | Without param -> generate `Migrates` folder and `Configuration.cs`                              | `-ProjectName NameOfProject`<br>`-MigrationsDirectory "Migrations\ContextA"` <br> `-ContextTypeName MyProject.Models.DBContextA`                                           |
+| Add-Migration    | Detect the difference between Model and Database <br>to generate the script or migrate cs files | `-ProjectName NameOfProject`<br>`-Name MigrateFileName` <br>`-ConfigurationTypeName ConfigA` <br> Note: Without parameter will use `Configuration.cs` in `Migrates` folder |
+| Update-Database  | Run update database based on migrate files                                                      | `-ProjectName NameOfProject`<br>`-ConfigurationTypeName ConfigurationB` <br> Rollback to a migrate file:  <br>  `-TargetMigration:MigrateFileName`                         |
+
+
+**Remarks**
+
+>To see the examples, type: get-help Enable-Migrations -examples.
+
+>For more information, type: get-help Enable-Migrations -detailed.
+
+>For technical information, type: get-help Enable-Migrations -full.
+
+**Reference**
+
+[How do I enable EF migrations for multiple contexts to separate databases?](https://stackoverflow.com/questions/13469881/how-do-i-enable-ef-migrations-for-multiple-contexts-to-separate-databases)
+
+## Add WebAPI into the existing WebMVC project
+
+Step 1: Adding the necessary WebAPI packages
+
+Step 2: Configuring the routing
+
+```csharp
+public static class WebApiConfig
+    {
+        public static void Register(HttpConfiguration config)
+        {
+            config.MapHttpAttributeRoutes();
+ 
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{action}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+        }
+    }
+```
+Step 3: Register api routing
+In the `Application_Start` method of the file `Global.asax.cs` file, we will add a call to  `GlobalConfiguration.Configure`; be careful to place it before  the call to `RouteConfig.RegisterRoutes`(RouteTable.Routes):
+
+```csharp
+public class MvcApplication : System.Web.HttpApplication
+    {
+        protected void Application_Start()
+        {
+            AreaRegistration.RegisterAllAreas();
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+        }
+    }
+```
+
+Example:
+
+```csharp
+namespace WebApplication1.Controllers.webapi
+{
+    [RoutePrefix("api/Students")]
+    public class WepApiController : ApiController
+    {
+        [HttpGet]
+        [Route("GetStudents")]
+        public List GetStudents()
+        {
+            List studentList = new List();
+ 
+            string[] students = { "John", "Henry", "Jane", "Martha" };
+ 
+            foreach (string student in students)
+            {
+                Student currentStudent = new Student
+                {
+                    Name = student,
+                    Email = student + "@academy.com"
+                };
+                studentList.Add(currentStudent);
+            }
+            return studentList;
+        }
+    }
+}
+```
+
+**http://localhost/api/Students/GetStudents**
+
+**Reference**
+
+[Adding Web API Support to an Existing ASP.NET MVC Project](https://developerslogblog.wordpress.com/2016/12/30/adding-web-api-support-to-an-existing-asp-net-mvc-project/)
