@@ -1,4 +1,4 @@
-# Daily Notes
+# Daily Notes - Uncategorized topic
 
 ## Simple Real Time App Architecture
 
@@ -438,3 +438,115 @@ namespace WebApplication1.Controllers.webapi
 **Reference**
 
 [Adding Web API Support to an Existing ASP.NET MVC Project](https://developerslogblog.wordpress.com/2016/12/30/adding-web-api-support-to-an-existing-asp-net-mvc-project/)
+
+
+## Practices for creating Api
+
+> Should apply for creating service
+
+* Should have base api controller for handle exception in one place
+
+```csharp
+public abstract class BaseApiController : ApiController
+    {
+        private readonly ILog _logger = LogManager.GetLogger(typeof(BaseApiController));
+
+        protected T HandleExceptions<T>(Func<T> func) where T : BaseApiResponse, new()
+        {
+            return HandleExceptions(func, null);
+        }
+
+        protected T HandleExceptions<T>(Func<T> func, string errorMessage) where T : BaseApiResponse, new()
+        {
+            try
+            {
+                var response = func();
+
+                var customResponse = response.ResponseResult;
+                response.ResponseResult = new TrmResponse()
+                {
+                    StatusCode = customResponse != null && customResponse.StatusCode != 0 ? customResponse.StatusCode : HttpStatusCode.OK,
+                    ResponseMessage = customResponse?.ResponseMessage ?? "OK"
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                if (string.IsNullOrEmpty(errorMessage))
+                    errorMessage = $"An error has occurred when getting {typeof(T).Name}";
+
+                _logger.Error(errorMessage + ex.StackTrace);
+                var t = new T()
+                {
+                    ResponseResult = new TrmResponse()
+                    {
+                        StatusCode = HttpStatusCode.InternalServerError,
+                        ResponseMessage = errorMessage,
+                        Exception = ex
+                    }
+                };
+                return t;
+            }
+        }
+    }
+
+```
+Example using `HandleException`
+
+```csharp
+    [HttpGet]
+    [AcceptVerbs("GET")]
+    [ResponseType(typeof(ExportTransactionResponse))]
+    public virtual ExportTransactionResponse GetExportTransactions(
+        int transactionType = -1,
+        string integrationStatus = null,
+        string contactId = null,
+        int numberItems = 0)
+        {
+            return HandleExceptions(() => new ExportTransactionResponse()
+            {
+                ExportTransactions = _exportTransactionsHelper.GetExportTransactions(
+                    transactionType,
+                    integrationStatus, contactId,
+                    numberItems).ToList()
+            });
+        }
+```
+
+* Should have base response class for consistency
+
+## Angular - Inject all Services that implement some Interface
+
+Using `[InjectionToken](https://angular.io/api/core/InjectionToken)`
+
+```typescript
+var myInterfaceToken new InjectionToken<MyInterface>('MyInterface');
+```
+
+```typescript
+
+// import `myInterfaceToken` to make it available in this file
+
+@NgModule({
+  providers: [ 
+    { provide: myInterfaceToken, useClass: Service1, multi:true },
+    { provide: myInterfaceToken, useClass: Service2, multi:true },
+  ],
+  boostrap: [AppComponent],
+)
+class AppComponent {}
+```
+
+```typescript
+// import `myInterfaceToken` to make it available in this file
+
+export class CollectorService {
+    constructor(@Inject(myInterfaceToken) services:MyInterface[]) {
+        services.forEach(s => s.foo());
+    }
+}
+```
+
+Source:
+
+[Inject all Services that implement some Interface](https://stackoverflow.com/questions/35916542/inject-all-services-that-implement-some-interface/35916788#35916788)

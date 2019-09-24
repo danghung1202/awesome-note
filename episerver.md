@@ -22,8 +22,14 @@
   - [Custom Workflow in commerce](#custom-workflow-in-commerce)
   - [How promotion engine work](#how-promotion-engine-work)
   - [How modeling product in real site and how to thinking in Episerver](#how-modeling-product-in-real-site-and-how-to-thinking-in-episerver)
+    - [Catalog Node Relation](#catalog-node-relation)
+    - [Catalog Entry Relation](#catalog-entry-relation)
+    - [Catalog Entry Association](#catalog-entry-association)
+    - [Catalog Entry Structure](#catalog-entry-structure)
   - [Metadata system](#metadata-system)
   - [How integrate epi commerce with other systems](#how-integrate-epi-commerce-with-other-systems)
+  - [Payment providers](#payment-providers)
+  - [Custom Shipping Methods](#custom-shipping-methods)
 
 ## How to override, decorate the default implement of the class in EpiServer
 
@@ -617,6 +623,16 @@ bullion:
 
 ```
 
+What action should you need validate cart?
+
+Whatever action impart shopping cart:
+
+* Add/Change/Remove line item
+* Apply/Remove promotion
+* Add/Remove shipments
+* Merge cart
+
+
 ```csharp
     public Dictionary<ILineItem, List<ValidationIssue>> ValidateCart(ICart cart)
     {
@@ -759,28 +775,107 @@ Catalog system's classes design
 
 ```
 
-Product: Well it’s a product. Normally, a Product is a place holder of information, it does not
+**Product:** 
+
+Well it’s a product. Normally, a Product is a place holder of information, it does not
 have inventories or prices for itself, so it’s not sell-able. (I’ve seen some customers sell products
 directly, it’s possible but it will be a lot more of works. I would suggest you to stick with the
 “standard” implementation instead). A product might have one or more variations.
 
 > There are Commerce sites which use Products as Variations, such as they have Prices on their own. Or some sites allow a Product to be the parent of other products. Those are possible, however, it’ll make the implementation harder. I would suggest to stick with the common way.
 
-Variation/SKU: A variation might have its own inventories and prices. In the end, it’s the thing your customers
+**Variation/SKU:**
+
+A variation might have its own inventories and prices. In the end, it’s the thing your customers
 actually buy. However, it’s possible your variations have no products on their own (when each and
 every variation is unique and don’t share anything with other variation, it does not really make
 sense to have “products” here).
 
-Package: A package consists of two or more variations, which itself act as a variation. Think of
+**Package:**
+
+A package consists of two or more variations, which itself act as a variation. Think of
 a package as a collection of items. You might have Harry Potter books as seven variations, and
 then you have a collection of them as a package. Package has its own prices and inventories.
 Therefore, when you buy, you all of items as one. Customers should not have the ability to
 change the quantity or remove items from a package.
 
-Bundle: A bundle is just a collection of things you can add to the cart at once, but then they
+**Bundle:**
+
+A bundle is just a collection of things you can add to the cart at once, but then they
 acts as individual items. They are something customers buy together, but are not forced to do
 so. You can change quantity of or remove items from the cart if you’d like to. Bundles have
 no prices or inventories of its own.
+
+### Catalog Node Relation
+
+* `NodeRelation` between Catalog Node and its nodes or entries
+
+[Categorizations](https://world.episerver.com/documentation/developer-guides/commerce/catalogs/catalog-content/Categorizations/)
+
+### Catalog Entry Relation
+
+There are three class representation the relations between entries
+
+* `ProductVariation` between a product and its variations
+* `BundleEntry` between a bundle and its entries.
+* `PackageEntry` between a package and its entries.
+
+Each class has two key fields:
+
+* Parent(ContentReference) reference To Product/Package/Bundle
+* Child(ContentReference) reference To Variation
+
+```mermaid
+    graph LR
+    A(Product)-->|has many ProductVariant|B(Variants)
+    C(Package)-->|has many PackageEntry|B(Variants)
+    D(Bundle)-->|has many BundleEntry|B(Variants)
+
+```
+
+using `EPiServer.Commerce.Catalog.Linking.IRelationRepository` to add, remove, get children, get parents
+
+ADD: `IRelationRepository.UpdateRelation(ProductVariation/BundleEntry/PackageEntry)`
+
+REMOVE: RemoveRelation
+
+GET CHILDREN: GetChildren
+
+GET PARENTS: GetParents
+
+> Used to import manually product instead of using Episerver's Service API
+
+More details:
+
+[Product variants](https://world.episerver.com/documentation/developer-guides/commerce/catalogs/catalog-content/Product-variants/)
+[Bundles and packages](https://world.episerver.com/documentation/developer-guides/commerce/catalogs/catalog-content/Bundles-and-packages/)
+
+### Catalog Entry Association
+
+for what?
+
+> Associations are the connections between products, so you can cross sell, or up sell other products. For example, if you are selling a table, you would want your customers to buy a chair.
+
+using `EPiServer.Commerce.Catalog.Linking.IAssociationRepository`
+
+Define `Group` for each association such as  "CrossSell", "UpSell"... to get related entries when user view detail product or add to cart...
+
+> For example, you can have a association group named CrossSell to define the products which can be suggested to customers when they have a product in cart.
+
+[Related entries](https://world.episerver.com/documentation/developer-guides/commerce/catalogs/catalog-content/Related-entries/)
+
+### Catalog Entry Structure
+
+```mermaid
+    graph LR
+    A((Catalog Entry))-->B(Extend Properties <br> based on MetaClass, MetaField)
+    A-->C(Pricing)
+    A-->D(Inventory)
+    A-->E(Assets)
+    A-->F(CMS properties)
+    A-->G(Relation)
+
+```
 
 ## Metadata system
 
@@ -796,6 +891,8 @@ To design dynamic entity to adapt with all kind of business
 
 ## How integrate epi commerce with other systems
 
+## Payment providers
 
+## Custom Shipping Methods
 
 
