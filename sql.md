@@ -4,7 +4,7 @@ Listing all useful scripts
 
 - [SQL Notes](#sql-notes)
   - [Get database size](#get-database-size)
-  - [Using `ROW_NUMBER()` and `MIN()` to select first row in each group when using group clause](#using-row_number-and-min-to-select-first-row-in-each-group-when-using-group-clause)
+  - [Using `ROW_NUMBER()` to select first row in each group when using group clause](#using-row_number-to-select-first-row-in-each-group-when-using-group-clause)
   - [Concat list values to string delimited BY char](#concat-list-values-to-string-delimited-by-char)
   - [Delete SQL log file](#delete-sql-log-file)
   - [Delete duplicate rows from a table](#delete-duplicate-rows-from-a-table)
@@ -26,23 +26,30 @@ Listing all useful scripts
     order by DataFileSizeMB desc
 ```
 
-## Using `ROW_NUMBER()` and `MIN()` to select first row in each group when using group clause
+## Using `ROW_NUMBER()` to select first row in each group when using group clause
 
 ```sql
-    /* using Row_NUMBER() to add row number into table ordered by LastUpdated column */ 
-    select RowNum = ROW_NUMBER() OVER(ORDER BY Contact.LastUpdated),  NEWID() as ID, 
-    		Contact.ID as ContactID, 
-    		Contact.TradingName COLLATE DATABASE_DEFAULT as TradingName, 
-    		Contact.LastUpdated, 
-    		TPICCode.PICCode COLLATE DATABASE_DEFAULT as PICCode, 
-    		TContactType.ContactType,
-    		TContactPICCount.CountOfPICCodes
-    	INTO #TempContact
-     from …..
-    
-    /* Using MIN() to select first row in each group */
-    (select MIN(#TempContact.RowNum) as ld from #TempContact group by PICCode))
+    SELECT *
+    FROM   
+    (
+        SELECT *, row_number() OVER(PARTITION BY ContactId ORDER BY UserCreatedDateTime asc) AS RowNumber
+        FROM  [dbo].[custom_ExportTransactions]
+    ) sub
+    WHERE  RowNumber = 1
+    ORDER BY UserCreatedDateTime
 ```
+
+using LinQ
+```csharp
+    var query = db.ExportTransactions.Where(x =>
+                        (transactionType == -1 || (int)x.TransactionType == transactionType) &&
+                        (contactId == null || x.ContactId == contactId) &&
+                        (x.IntegrationStatus != Constants.StringConstants.AxIntegrationStatus.SentToAX))
+                    .GroupBy(x => x.ContactId, (key, g) => g.OrderBy(x => x.UserCreatedDateTime).FirstOrDefault())
+                    .OrderBy(x => x.UserCreatedDateTime)
+```
+
+> LinQ generates the query more complicated than the sql query
 
 ## Concat list values to string delimited BY char
 
@@ -74,10 +81,7 @@ Listing all useful scripts
 ```sql
     WITH cte AS (
         SELECT 
-            contact_id, 
-            first_name, 
-            last_name, 
-            email, 
+            *, 
             ROW_NUMBER() OVER (
                 PARTITION BY 
                     first_name, 
