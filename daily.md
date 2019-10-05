@@ -307,8 +307,15 @@ Example using `HandleException`
             });
         }
 ```
+> Should have base response class for consistency
 
-* Should have base response class for consistency
+## .Net Web API - How security to call api
+
+
+
+Reference:
+
+[Securing ASP.NET Web API](https://code.tutsplus.com/tutorials/securing-aspnet-web-api--cms-26012)
 
 ## Angular - Inject all Services that implement some Interface
 
@@ -346,5 +353,154 @@ Source:
 
 [Inject all Services that implement some Interface](https://stackoverflow.com/questions/35916542/inject-all-services-that-implement-some-interface/35916788#35916788)
 
+## Issues Highlighted during third party penetration tests
+
+Some security issues are raised by the Maginus customer:
 
 https://maginus.atlassian.net/browse/NRAL-2500
+
+
+![](images/security_issues.png)
+
+
+## Authentication and authorization in Asp.Net
+
+The evolution of provider
+
+```mermaid
+    graph TD
+    0(Asp.net 1.0)-->A(Membership Provider <br> Asp.Net 2.0 release in 2005)
+    A-->B(Simple Membership <br> Asp.net 4.0/Mvc 4 around 2008)
+    B-->C(Universal Provider <br> Asp.net 4.0/4.5)
+    C-->D(Asp.net Identity <br> Asp.net 4.5/Mvc 5)
+```
+
+Asp.net Identity step by step:
+
+Source: https://www.tektutorialshub.com/asp-net/asp-net-introduction-to-asp-net-identity/
+
+https://bitoftech.net/2015/01/21/asp-net-identity-2-with-asp-net-web-api-2-accounts-management/
+
+Why?
+
+Membership Provider:
+* Must use the MS SQL Database
+* Can not custom the User table
+
+Simple Membership Provider: tries to address these issues by offering a flexible model for authenticating the users.
+
+The inheritance hierarchy of SimpleMembership
+
+![The inheritance hierarchy of SimpleMembership](images/SimpleMembership.png)
+
+Reference:
+
+[Using SimpleMembership in ASP.NET MVC 4](https://www.codeguru.com/csharp/.net/net_asp/mvc/using-simplemembership-in-asp.net-mvc-4.htm)
+
+
+**What is OAuth?**
+
+OAuth is about authorization and not authentication. Authorization is asking for permission to do stuff. 
+Authentication is about proving you are the correct person because you know things. 
+
+OAuth doesn’t pass authentication data between consumers and service providers – but instead acts as an authorization token of sorts.
+
+
+**OAuth implementation**
+
+**OAuth 1 vs OAuth 2**
+
+OAuth 2.0 is a complete redesign from OAuth 1.0, and the two are not compatible
+
+OAuth 2.0 is faster and easier to implement. OAuth 1.0 used complicated cryptographic requirements, only supported three flows, and did not scale.
+
+OAuth 2.0, on the other hand, has six flows for different types of applications and requirements, and enables signed secrets over HTTPS. OAuth tokens no longer need to be encrypted on the endpoints in 2.0 since they are encrypted in transit.
+
+https://www.varonis.com/blog/what-is-oauth/
+
+**OAuth vs. OpenID**
+
+OpenID is about authentication (ie. proving who you are), 
+
+OAuth is about authorisation (ie. to grant access to functionality/data/etc.. without having to deal with the original authentication).
+
+> OAuth is not an OpenID extension. Why OAuth is not an OpenID extension?
+
+The answer is simple, OAuth attempts to provide a standard way for developers to offer their services via an API without forcing their users to expose their passwords (and other credentials)
+
+If OAuth depended on OpenID, only OpenID services would be able to use it, and while OpenID is great, there are many applications where it is not suitable or desired.
+
+> However you can OAuth and OpenID together
+
+http://cakebaker.42dh.com/2008/04/01/openid-versus-oauth-from-the-users-perspective/
+
+http://techastute.blogspot.com/2012/05/openid-authentication-oauth.html
+
+[What's the difference between OpenID and OAuth?](https://stackoverflow.com/questions/1087031/whats-the-difference-between-openid-and-oauth)
+
+**SAML vs. OAuth**
+
+SAML (Security Assertion Markup Language) is an alternative federated authentication standard that many enterprises use for Single-Sign On (SSO). 
+SAML enables enterprises to monitor who has access to corporate resources.
+
+OAuth doesn’t share password data but instead uses authorization tokens to prove an identity between consumers and service providers. 
+OAuth is an authorization protocol that allows you to approve one application interacting with another on your behalf without giving away your password.
+
+| SAML                                                                                                                                                                                                             | OAuth                                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SAML uses XML to pass messages                                                                                                                                                                                   | OAuth uses JSON                                                                                                                                                                               |
+| SAML is geared towards enterprise security                                                                                                                                                                       | OAuth provides a simpler mobile experience                                                                                                                                                    |
+| SAML, on the other hand, drops a session cookie in a browser that allows a user to access certain web pages – great for short-lived work days, but not so great when have to log into your thermostat every day. | OAuth uses API calls extensively, which is why mobile applications, modern web applications, game consoles, and Internet of Things (IoT) devices find OAuth a better experience for the user. |
+
+Reference
+
+[What is OAuth? Definition and How it Works](https://www.varonis.com/blog/what-is-oauth/)
+
+**SAML vs. OpenID**
+
+They are two different protocols of authentication and they differ at the technical level.
+
+SAML2 supports single sign-out - but OpenID does not
+
+SAML 2 is based on XML while OpenID is not.
+
+SAML2 has different bindings while the only binding OpenID has is HTTP
+
+Same in primary use case but has difference scope
+
+SAML - SSO for enterprise apps
+
+OpenID - SSO for consumer apps
+
+![](images/saml_openid_oauth.png)
+
+https://www.resilient-networks.com/concept-week-saml-oauth2-openid-connect/
+
+![](images/saml_openIdc_oauth2.png)
+
+https://spin.atomicobject.com/2016/05/30/openid-oauth-saml/
+
+https://stackoverflow.com/questions/7699200/what-is-the-difference-between-openid-and-saml
+
+**OAuth vs JWT**
+
+OAuth 2.0 defines a protocol, i.e. specifies how tokens are transferred, JWT defines a token format.
+
+> Firstly, we have to differentiate JWT and OAuth. Basically, JWT is a token format. OAuth is an authorization protocol that can use JWT as a token.
+
+OAuth uses server-side and client-side storage. If you want to do real logout you must go with OAuth2. Authentication with JWT token can not logout actually. Because you don't have an Authentication Server that keeps track of tokens.
+
+If you want to provide an API to 3rd party clients, you must use OAuth2 also.
+
+OAuth2 is very flexible. JWT implementation is very easy and does not take long to implement.
+
+If your application needs this sort of flexibility, you should go with OAuth2. But if you don't need this use-case scenario, implementing OAuth2 is a waste of time.
+
+
+https://stackoverflow.com/questions/39909419/what-are-the-main-differences-between-jwt-and-oauth-authentication
+
+**Can OAuth can use to authentication?**
+
+https://oauth.net/articles/authentication/
+
+A standard for user authentication using OAuth: OpenID Connect

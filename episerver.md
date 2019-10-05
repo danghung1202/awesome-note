@@ -30,6 +30,8 @@
   - [How integrate epi commerce with other systems](#how-integrate-epi-commerce-with-other-systems)
   - [Payment providers](#payment-providers)
   - [Custom Shipping Methods](#custom-shipping-methods)
+  - [Key points](#key-points)
+  - [BusinessManager](#businessmanager)
 
 ## How to override, decorate the default implement of the class in EpiServer
 
@@ -895,4 +897,18 @@ To design dynamic entity to adapt with all kind of business
 
 ## Custom Shipping Methods
 
+## Key points
+
+
+Limitations in synchronization –The synchronization of catalog models works mostly the same way as with content types in CMS, except that the data will be persisted by Meta Data Plus in the ECF database. A few extra steps are however added for Commerce.The following will not be done automatically and require manual steps. 
+•Change type of a property. Will cause an exception. 
+•Rename a model class. Unless specified by the CatalogContentTypeattribute, a new meta class will be added, but the old one will be left in the system. 
+•Rename a property. Will add a new meta field, but the old one will be left in the system. 
+•Remove a property. 
+
+Note: “Different properties” with the “same name” must have identical definition. For example, a property named "Description" on two different classes will not work if one is culture specific and the other one is not. In ECF MetaFieldsare shared among MetaClassesand can because of this only have one definition.
+
+## BusinessManager
+
+To get/create/update/delete the commerce entities (Meta Class Name) such as ContactEntity, AddressEntity...
 
