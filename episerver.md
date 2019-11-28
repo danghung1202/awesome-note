@@ -32,6 +32,8 @@
   - [Custom Shipping Methods](#custom-shipping-methods)
   - [Key points](#key-points)
   - [BusinessManager](#businessmanager)
+  - [Dependency Injection](#dependency-injection)
+  - [DDS Behind the scenes](#dds-behind-the-scenes)
 
 ## How to override, decorate the default implement of the class in EpiServer
 
@@ -461,6 +463,7 @@ Using **[ReferenceConverter](https://world.episerver.com/documentation/Class-lib
 What default services Epi Commerce provide?
 
 `IPriceService` (The readonly get price service) using `PriceFilter` -> to get original price
+
 `IPriceDetailService` (The service for update price)
 
 `IPromotionEngine, IPromotionEngineExtensions` to get discounted price
@@ -671,21 +674,56 @@ Whatever action impart shopping cart:
     B-->|Has many|C(Shipments)
     C-->|Has many|D(Line Item)
     B-->|has many|E(Payments)
-    F(Credit Cart Payment)-->|inherits|E
+    F(Credit Cart Payment)-->|inherits from|E
     C-->|has shipping address|G(Order Address)
     E-->|has billing address|G
-    A-->|inherits|I(Extended Properties)
-    P(Payment Plan)-->|inherits|A
-    AC(Cart)-->|inherits|A
-    PO(Purchase Order)-->|inherits|A
+    A-->|inherits from|I(Extended Properties)
+    AC(Cart/ShoppingCart)-->|inherits from|A
+    PO(Purchase Order)-->|inherits from|A
+    P(Payment Plan)-->|inherits from|A
 
 ```
 
 ## What code flow in checkout
 
+
+Place Order process
+
+```mermaid
+    graph TD
+    A(Load or Create Cart)-->B(Set Shipping Address)
+    B-->C(Set Shipping Method)
+    C-->C1(Validate Cart <br> Validate Line Item <br> Update placed price <br> Update inventory <br> Apply Promotions/Discounts)
+    C1-->C2(Adjust Inventory)
+    C2-->D(Get Billing Address)
+    D-->E(Get Payment Method)
+    E-->F(Create Payment)
+    F-->F1(Add payment to cart)
+    F1-->G(Process Payment)
+    G-->|failed|X(Cancel Payment)
+    X-->Y(Update Order Status = Cancelled)
+    Y-->Z(Adjust Inventory)
+    Z-->Z1(Remove previous payment)
+    G-->|success|H(Create Purchase Order From Cart)
+    H-->K(Generate Order Number)
+    K-->I(Delete Old Cart)
+    I-->J(Save Order with Status = InProgress)
+    J-->O(Show confirmation to end user)
+```
+
 ## Custom Workflow in commerce
 
 ## How promotion engine work
+
+```mermaid
+    graph LR
+    A(Update Shipping Method)-->B(Run Apply Discounts)
+```
+
+```mermaid
+    graph LR
+    A(Add coupon code)-->B(Run Apply Discounts)
+```
 
 ## How modeling product in real site and how to thinking in Episerver
 
@@ -773,8 +811,6 @@ Catalog system's classes design
     C-->C2(VariationContent)
     C-->C3(BundleContent)
     C-->C4(PackageContent)
-
-
 ```
 
 **Product:** 
@@ -895,6 +931,8 @@ To design dynamic entity to adapt with all kind of business
 
 ## Payment providers
 
+Note: Need to import the xml which contains the payment meta class in commerce manager
+
 ## Custom Shipping Methods
 
 ## Key points
@@ -912,3 +950,20 @@ Note: “Different properties” with the “same name” must have identical de
 
 To get/create/update/delete the commerce entities (Meta Class Name) such as ContactEntity, AddressEntity...
 
+## Dependency Injection
+
+## DDS Behind the scenes
+
+Episerver will create a store definition which is held in 5 tables in your database:
+
+* `tblBigTableStoreConfig` – here you can find the ID of your store (column `pkId`), a name of your store (column `StoreName`) and the name of the table in which your data is stored (column `TableName`). In our example, the values are respectively `Setapp.DataStore.PageViewsData` and `tblBigTable`. The store name is the full name of the class (including its namespace) but it can be changed with another parameter in `EPiServerDataStore` attribute and that parameter is called simply `StoreName`. 
+
+* `tblBigTable` is the default table that already exists in the Episerver database
+* `tblBigTable` – data from simple fields is stored here
+* `tblBigTableReference` – data from fields like lists and dictionaries is stored here
+* `tblBigTableStoreInfo` – this is where Episerver stores information about how a class is mapped into all the columns in `tblBigTable`
+* `tblBigTableIdentity` – here you can find a unique GUID of a store
+
+* After the first use of the store, Episerver creates an `SQL` view which can be used to read data easily. So if you need to check some data in your database, you don’t need to go through all the tables mentioned before and join them. Instead, you can simply query a view. Its name pattern is `VW_{name_of_a_store}`. Columns of the view correspond to a store’s class properties so in our case we have columns like Id, StoreId, ExternalId, ItemType, PageId, ViewsAmount.
+
+[Dynamic Data Store implementation](https://blog.setapp.pl/dds-implementation-episerver/)
