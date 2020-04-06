@@ -147,3 +147,18 @@ https://maginus.atlassian.net/browse/NRAL-2500
 
 
 ![](images/security_issues.png)
+
+## NPM packages are not building on Windows 8.1/10 - related to VsBuild C++
+
+[https://github.com/nodejs/node-gyp/issues/629](https://github.com/nodejs/node-gyp/issues/629)
+
+Applying for install some packages:
+bson
+bufferutil
+kerberos
+node-sass
+sqlite3
+phantomjs
+utf-8-validate
+
+Especially, the node-sass package
