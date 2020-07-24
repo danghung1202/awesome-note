@@ -967,3 +967,6 @@ Episerver will create a store definition which is held in 5 tables in your datab
 * After the first use of the store, Episerver creates an `SQL` view which can be used to read data easily. So if you need to check some data in your database, you don’t need to go through all the tables mentioned before and join them. Instead, you can simply query a view. Its name pattern is `VW_{name_of_a_store}`. Columns of the view correspond to a store’s class properties so in our case we have columns like Id, StoreId, ExternalId, ItemType, PageId, ViewsAmount.
 
 [Dynamic Data Store implementation](https://blog.setapp.pl/dds-implementation-episerver/)
+
+## Loading carts in a load balancing environment
+[https://vimvq1987.com/loading-carts-load-balancing-environment/]https://vimvq1987.com/loading-carts-load-balancing-environment/
