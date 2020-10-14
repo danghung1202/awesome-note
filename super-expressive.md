@@ -2,7 +2,7 @@
 
 Source: https://github.com/francisrstokes/super-expressive
 
-Playgroup: https://sepg.netlify.app/
+Playground: https://sepg.netlify.app/
 
 ## First Name and Last Name
 * Must not include any of the following characters :@.$#{}[]?<>+=()123456789
