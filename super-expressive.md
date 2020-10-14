@@ -13,12 +13,12 @@ Playground: https://sepg.netlify.app/
 SuperExpressive()
 .startOfInput
 .atLeast(2)
-.anythingButChars(' @.$#{}[]?<>+=()123456789')
+    .anythingButChars(' @.$#{}[]?<>+=()123456789')
 .between(0,2)
-.capture
-    .char(' ')
-    .atLeast(1)
-        .anythingButChars(' @.$#{}[]?<>+=()123456789')
+    .capture
+        .char(' ')
+        .atLeast(1)
+            .anythingButChars(' @.$#{}[]?<>+=()123456789')
     .end()
 .endOfInput
 .toRegex()
@@ -32,24 +32,24 @@ This must include an @ with 1 or more characters before and after the @
 SuperExpressive()
 .startOfInput
 .oneOrMore
-.anyOf
-    .word
-    .anythingButChars('_')
-.end()
+    .anyOf
+        .word
+        .anythingButChars('_')
+    .end()
 .oneOrMore
-.anyOf
-    .word
-    .anyOfChars('.-')
-.end()
+    .anyOf
+        .word
+        .anyOfChars('.-')
+    .end()
 .char('@')
 .oneOrMore
-.anyOf
-    .word
-    .anyOfChars('-')
-.end()
+    .anyOf
+        .word
+        .anyOfChars('-')
+    .end()
 .char('.')
 .atLeast(2)
-.range('a','z')
+    .range('a','z')
 .endOfInput
 .toRegex();
 ```
@@ -63,11 +63,11 @@ SuperExpressive()
 SuperExpressive()
 .startOfInput
 .atLeast(10)
-.anyOf
-    .digit
-    .range('a','z')
-    .range('A','Z')
-    .anyOfChars('+ ()-')
+    .anyOf
+        .digit
+        .range('a','z')
+        .range('A','Z')
+        .anyOfChars('+ ()-')
     .end()
 .endOfInput
 .toRegex()
