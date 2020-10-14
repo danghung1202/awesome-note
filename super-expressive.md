@@ -1,4 +1,4 @@
-# Super-expressive snip code
+# Super-expressive Snippet
 
 Source: https://github.com/francisrstokes/super-expressive
 
