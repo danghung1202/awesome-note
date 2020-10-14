@@ -31,25 +31,23 @@ This must include an @ with 1 or more characters before and after the @
 ```typescript
 SuperExpressive()
 .startOfInput
-.oneOrMore
+.atLeast(1)
     .anyOf
         .word
-        .anythingButChars('_')
-    .end()
-.oneOrMore
-    .anyOf
-        .word
-        .anyOfChars('.-')
+        .anyOfChars('-.')
     .end()
 .char('@')
-.oneOrMore
+.atLeast(1)
     .anyOf
         .word
         .anyOfChars('-')
     .end()
 .char('.')
-.atLeast(2)
-    .range('a','z')
+.atLeast(1)
+    .anyOf
+        .range('a','z')
+        .range('A','Z')
+    .end()
 .endOfInput
 .toRegex();
 ```
