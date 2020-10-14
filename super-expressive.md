@@ -4,7 +4,29 @@ Source: https://github.com/francisrstokes/super-expressive
 
 Playgroup: https://sepg.netlify.app/
 
+## First Name and Last Name
+* Must not include any of the following characters :@.$#{}[]?<>+=()123456789
+* A maximum of 2 spaces
+* Minimum length of 2 characters
+
+```typescript
+SuperExpressive()
+.startOfInput
+.atLeast(2)
+.anythingButChars(' @.$#{}[]?<>+=()123456789')
+.between(0,2)
+.capture
+    .char(' ')
+    .atLeast(1)
+        .anythingButChars(' @.$#{}[]?<>+=()123456789')
+    .end()
+.endOfInput
+.toRegex()
+```
+
 ## Email regex
+
+This must include an @ with 1 or more characters before and after the @
 
 ```typescript
 SuperExpressive()
@@ -33,6 +55,9 @@ SuperExpressive()
 ```
 
 ## Telephone regex
+
+* A minimum of 10 characters
+* Must not include any of the following characters :@.$#{}[]?<>=
 
 ```typescript
 SuperExpressive()
