@@ -378,3 +378,33 @@ https://stackoverflow.com/questions/39909419/what-are-the-main-differences-betwe
 https://oauth.net/articles/authentication/
 
 A standard for user authentication using OAuth: OpenID Connect
+
+## MVC Only Validation for fields which be declared in html form
+
+```csharp
+    public class ValidateOnlyIncomingValuesAttribute : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            var modelState = filterContext.Controller.ViewData.ModelState;
+            var valueProvider = filterContext.Controller.ValueProvider;
+
+            var keysWithNoIncomingValue = modelState.Keys.Where(x => !valueProvider.ContainsPrefix(x));
+            foreach (var key in keysWithNoIncomingValue)
+                modelState[key].Errors.Clear();
+        }
+    }
+    
+    //Usage
+    [HttpPost]
+    [ValidateOnlyIncomingValues]
+    public ActionResult Index(PageViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            // ReSharper disable once Mvc.ViewNotResolved
+            return View(viewModel);
+        }
+    }
+
+```
