@@ -981,3 +981,22 @@ var uri = new Uri($"{Blob.BlobUriScheme}://{Blob.DefaultProvider}/{media?.Binary
 var blob = _blobFactory.GetBlob(uri);
 
 ```
+
+## How make the property is only available to Admin
+
+The episerver is only support restrict access for the tab in each Page Type, so group all restrict properties in new tab then limit access this tab
+
+```csharp
+[GroupDefinitions]
+public static class SiteTabs
+{
+    [Display(Order = 12)]
+    [RequiredAccess(AccessLevel.Edit)]
+    public const string Header = "Header";
+    
+    [Display(Order = 24)]
+    [RequiredAccess(AccessLevel.Administer)]
+    public const string ECommerce = "E-Commerce";
+}
+
+```
