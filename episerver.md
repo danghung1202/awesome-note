@@ -970,3 +970,14 @@ Episerver will create a store definition which is held in 5 tables in your datab
 
 ## Loading carts in a load balancing environment
 [https://vimvq1987.com/loading-carts-load-balancing-environment/]https://vimvq1987.com/loading-carts-load-balancing-environment/
+
+## How create Blob Uri
+
+```csharp
+
+MediaData media =...;
+var resizedImageName = $"{cachePrefix}{resizedImagePath.ToSHA1Fingerprint()}.{resizedImageConfig.Extenstion}";
+var uri = new Uri($"{Blob.BlobUriScheme}://{Blob.DefaultProvider}/{media?.BinaryDataContainer?.Segments[1]}/{resizedImageName}");
+var blob = _blobFactory.GetBlob(uri);
+
+```
