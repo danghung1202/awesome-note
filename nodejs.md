@@ -168,11 +168,11 @@ In CommonJS
 
 ```mermaid
     graph TD
-        A(call require func)-->B(synchronously loads the content of module file)
-        B-->C(synchronously parses and compiles the JavaScript code)
-        C-->D(and synchronously evaluates the code)
-        D-->F(returning the value of module.exports)
-        F-->G(the shape of the module is known and can be used)
+    A(invoke require func)-->B(synchronously loads the content of module file)
+    B-->C(synchronously parses and compiles the JavaScript code)
+    C-->D(and synchronously evaluates the code)
+    D-->F(returning the value of module.exports)
+    F-->G(the shape of the module is known and can be used)
 ```
 
 in ES6
